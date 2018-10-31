@@ -169,15 +169,22 @@ public class Utils {
 
     public static String getExifDate(File file) throws IOException {
         ExifInterface exif = new ExifInterface(file.getAbsolutePath());
-        return exif.getAttribute(ExifInterface.TAG_DATETIME);
+
+        if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
+            return exif.getAttribute(ExifInterface.TAG_DATETIME);
+        }
+
+        return null;
     }
 
     public static float[] getExifLatLon(File file) throws IOException {
         ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+
         float[] latlon = {0, 0};
         if (exif.getLatLong(latlon)) {
             return latlon;
         }
+
         return null;
     }
 }

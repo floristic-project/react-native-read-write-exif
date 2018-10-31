@@ -13,13 +13,14 @@ import java.io.File;
 public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     private static final String E_DATE_EXIF_ERROR = "E_DATE_EXIF_ERROR";
-    private Exception exception;
 
     private File file;
 
     private Callback errorCallback;
     private Callback successCallback;
     private Promise promise;
+
+    private Exception exception;
 
     public ReadExifDateTask(@NonNull File file,
                         @Nullable Callback errorCallback, @Nullable Callback successCallback,
@@ -45,7 +46,7 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected void onPostExecute(String date) {
-        if (date != null) {
+        if (this.exception == null) {
             if (this.promise != null) {
                 this.promise.resolve(date);
             } else if (this.successCallback != null) {
@@ -56,9 +57,7 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
                 this.promise.reject(ReadExifDateTask.E_DATE_EXIF_ERROR, this.exception);
             } else if (this.errorCallback != null) {
                 this.errorCallback.invoke(
-                        ReadExifDateTask.E_DATE_EXIF_ERROR + (
-                                this.exception != null ? " " + this.exception.getMessage() : ""
-                        )
+                        ReadExifDateTask.E_DATE_EXIF_ERROR + this.exception.getMessage()
                 );
             }
         }

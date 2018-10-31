@@ -13,7 +13,6 @@ import java.io.File;
 public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     private static final String E_COPY_EXIF_ERROR = "E_COPY_EXIF_ERROR";
-    private Exception exception;
 
     private File srcFile;
     private File destFile;
@@ -21,6 +20,8 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
     private Callback errorCallback;
     private Callback successCallback;
     private Promise promise;
+
+    private Exception exception;
 
     public CopyExifTask(@NonNull File srcFile, @NonNull File destFile,
                         @Nullable Callback errorCallback, @Nullable Callback successCallback,

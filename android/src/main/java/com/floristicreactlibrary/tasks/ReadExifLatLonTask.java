@@ -17,13 +17,14 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
     private static final String E_LAT_LON_EXIF_ERROR = "E_LAT_LON_EXIF_ERROR";
     private static final String LAT = "lat";
     private static final String LON = "lon";
-    private Exception exception;
 
     private File file;
 
     private Callback errorCallback;
     private Callback successCallback;
     private Promise promise;
+
+    private Exception exception;
 
     public ReadExifLatLonTask(@NonNull File file,
                             @Nullable Callback errorCallback, @Nullable Callback successCallback,
@@ -55,7 +56,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected void onPostExecute(WritableMap latlon) {
-        if (latlon != null) {
+        if (this.exception == null) {
             if (this.promise != null) {
                 this.promise.resolve(latlon);
             } else if (this.successCallback != null) {
@@ -66,9 +67,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                 this.promise.reject(ReadExifLatLonTask.E_LAT_LON_EXIF_ERROR, this.exception);
             } else if (this.errorCallback != null) {
                 this.errorCallback.invoke(
-                        ReadExifLatLonTask.E_LAT_LON_EXIF_ERROR + (
-                                this.exception != null ? " " + this.exception.getMessage() : ""
-                        )
+                        ReadExifLatLonTask.E_LAT_LON_EXIF_ERROR + this.exception.getMessage()
                 );
             }
         }
