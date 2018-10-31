@@ -1,6 +1,7 @@
 package com.floristicreactlibrary.utils;
 
 import android.media.ExifInterface;
+import android.util.Log;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
@@ -170,9 +171,14 @@ public class Utils {
     public static String getExifDate(File file) throws IOException {
         ExifInterface exif = new ExifInterface(file.getAbsolutePath());
 
+        Log.d("Utils::getExifDate", "ExifInterface: ok");
+
         if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
+            Log.d("Utils::getExifDate", "TAG_DATETIME: found");
             return exif.getAttribute(ExifInterface.TAG_DATETIME);
         }
+
+        Log.d("Utils::getExifDate", "TAG_DATETIME: missing");
 
         return null;
     }
@@ -180,10 +186,15 @@ public class Utils {
     public static float[] getExifLatLon(File file) throws IOException {
         ExifInterface exif = new ExifInterface(file.getAbsolutePath());
 
+        Log.d("Utils::getExifLatLon", "ExifInterface: ok");
+
         float[] latlon = {0, 0};
         if (exif.getLatLong(latlon)) {
+            Log.d("Utils::getExifLatLon", "getLatLong: found");
             return latlon;
         }
+
+        Log.d("Utils::getExifLatLon", "getLatLong: missing");
 
         return null;
     }

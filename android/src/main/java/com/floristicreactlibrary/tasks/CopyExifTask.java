@@ -3,6 +3,7 @@ package com.floristicreactlibrary.tasks;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -36,6 +37,8 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Integer... integers) {
+        Log.d("CopyExifTask", "running");
+
         if (this.srcFile != null && this.destFile != null) {
             try {
                 return Utils.copyExifData(this.srcFile, this.destFile, null);
@@ -43,12 +46,19 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
                 this.exception = e;
             }
         }
+
+        Log.d("CopyExifTask", "failed: missing file(s)");
+
         return false;
     }
 
     @Override
     protected void onPostExecute(Boolean succeeded) {
-        if (succeeded) {
+        Log.d("CopyExifTask", "ending");
+        Log.d("CopyExifTask", "succeeded: " + (succeeded != null ? succeeded : "null"));
+        Log.d("CopyExifTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+
+        if (succeeded != null && succeeded) {
             if (this.promise != null) {
                 this.promise.resolve(succeeded);
             } else if (this.successCallback != null) {

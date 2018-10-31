@@ -3,6 +3,7 @@ package com.floristicreactlibrary.tasks;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -34,6 +35,8 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected String doInBackground(Integer... integers) {
+        Log.d("ReadExifDateTask", "running");
+
         if (this.file != null) {
             try {
                 return Utils.getExifDate(this.file);
@@ -41,11 +44,18 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
                 this.exception = e;
             }
         }
+
+        Log.d("ReadExifDateTask", "failed: missing file");
+
         return null;
     }
 
     @Override
     protected void onPostExecute(String date) {
+        Log.d("ReadExifDateTask", "ending");
+        Log.d("ReadExifDateTask", "date: " + (date != null ? date : "null"));
+        Log.d("ReadExifDateTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+
         if (this.exception == null) {
             if (this.promise != null) {
                 this.promise.resolve(date);

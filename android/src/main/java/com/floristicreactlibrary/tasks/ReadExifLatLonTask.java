@@ -3,6 +3,7 @@ package com.floristicreactlibrary.tasks;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -38,9 +39,14 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected WritableMap doInBackground(Integer... integers) {
+        Log.d("ReadExifLatLonTask", "running");
+
         if (this.file != null) {
             try {
                 float[] latlon = Utils.getExifLatLon(this.file);
+
+                Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
+
                 if (latlon != null && latlon.length == 2) {
                     WritableMap map = new WritableNativeMap();
                     map.putDouble(ReadExifLatLonTask.LAT, Float.valueOf(latlon[0]).doubleValue());
@@ -51,11 +57,18 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                 this.exception = e;
             }
         }
+
+        Log.d("ReadExifLatLonTask", "failed: missing file");
+
         return null;
     }
 
     @Override
     protected void onPostExecute(WritableMap latlon) {
+        Log.d("ReadExifLatLonTask", "ending");
+        Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon.toString() : "null"));
+        Log.d("ReadExifLatLonTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+
         if (this.exception == null) {
             if (this.promise != null) {
                 this.promise.resolve(latlon);
