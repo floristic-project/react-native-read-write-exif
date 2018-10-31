@@ -90,10 +90,22 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
         if (file == null || !file.exists()) {
             throw new Exception("File does not exist");
         }
+
+        if (!file.isFile()) {
+            throw new Exception("This is not a file");
+        }
+
+        if (!file.canRead()) {
+            throw new Exception("File cannot be read");
+        }
+
+        if (!file.canWrite()) {
+            throw new Exception("File cannot be written");
+        }
     }
 
     @ReactMethod
-    public void copyExif(String srcUri, String destUri, Callback errorCallback, Callback successCallback) {
+    public void copyExifCallback(String srcUri, String destUri, Callback errorCallback, Callback successCallback) {
         File srcFile;
         File destFile;
 
@@ -148,7 +160,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void readExifDate(String uri, Callback errorCallback, Callback successCallback) {
+    public void readExifDateCallback(String uri, Callback errorCallback, Callback successCallback) {
         File file;
 
         try {
@@ -184,7 +196,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void readExifLatLon(String uri, Callback errorCallback, Callback successCallback) {
+    public void readExifLatLonCallback(String uri, Callback errorCallback, Callback successCallback) {
         File file;
 
         try {
