@@ -205,7 +205,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
     private void readExifDate(@NonNull File file,
                               @Nullable Callback errorCallback, @Nullable Callback successCallback,
                               @Nullable Promise promise) {
-        ReadExifDateTask task = new ReadExifDateTask(file, errorCallback, successCallback, promise);
+        ReadExifDateTask task = new ReadExifDateTask(this.reactContext, file, errorCallback, successCallback, promise);
         task.execute();
     }
 
@@ -246,7 +246,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
     private void readExifLatLon(@NonNull File file,
                               @Nullable Callback errorCallback, @Nullable Callback successCallback,
                               @Nullable Promise promise) {
-        ReadExifLatLonTask task = new ReadExifLatLonTask(file, errorCallback, successCallback, promise);
+        ReadExifLatLonTask task = new ReadExifLatLonTask(this.reactContext, file, errorCallback, successCallback, promise);
         task.execute();
     }
 }

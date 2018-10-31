@@ -1,6 +1,8 @@
 package com.floristicreactlibrary.utils;
 
-import android.media.ExifInterface;
+import android.content.Context;
+import android.net.Uri;
+import android.support.media.ExifInterface;
 import android.util.Log;
 
 import org.apache.sanselan.ImageReadException;
@@ -20,6 +22,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -168,33 +171,63 @@ public class Utils {
         return result;
     }
 
-    public static String getExifDate(File file) throws IOException {
-        ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+    public static String getExifDate(Context context, File file) throws IOException {
+        Uri uri = Uri.fromFile(file);
+        InputStream in;
+        in = context.getContentResolver().openInputStream(uri);
 
-        Log.d("Utils::getExifDate", "ExifInterface: ok");
+        if (in != null) {
+            ExifInterface exif = new ExifInterface(in);
 
-        if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
-            Log.d("Utils::getExifDate", "TAG_DATETIME: found");
-            return exif.getAttribute(ExifInterface.TAG_DATETIME);
+            Log.d("Utils::getExifDate", "ExifInterface: ok");
+
+            if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
+                Log.d("Utils::getExifDate", "TAG_DATETIME: found");
+                return exif.getAttribute(ExifInterface.TAG_DATETIME);
+            }
+
+            if (exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED) != null) {
+                Log.d("Utils::getExifDate", "TAG_DATETIME_DIGITIZED: found");
+                return exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
+            }
+
+            if (exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) != null) {
+                Log.d("Utils::getExifDate", "TAG_DATETIME_ORIGINAL: found");
+                return exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
+            }
+
+            if (exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP) != null) {
+                Log.d("Utils::getExifDate", "TAG_GPS_DATESTAMP: found");
+                return exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
+            }
+
+            in.close();
+
+            Log.d("Utils::getExifDate", "DATE: missing");
         }
-
-        Log.d("Utils::getExifDate", "TAG_DATETIME: missing");
 
         return null;
     }
 
-    public static float[] getExifLatLon(File file) throws IOException {
-        ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+    public static double[] getExifLatLon(Context context, File file) throws IOException {
+        Uri uri = Uri.fromFile(file);
+        InputStream in;
+        in = context.getContentResolver().openInputStream(uri);
 
-        Log.d("Utils::getExifLatLon", "ExifInterface: ok");
+        if (in != null) {
+            ExifInterface exif = new ExifInterface(in);
 
-        float[] latlon = {0, 0};
-        if (exif.getLatLong(latlon)) {
-            Log.d("Utils::getExifLatLon", "getLatLong: found");
-            return latlon;
+            Log.d("Utils::getExifLatLon", "ExifInterface: ok");
+
+            if (exif.getLatLong() != null) {
+                Log.d("Utils::getExifLatLon", "getLatLong: found");
+                return exif.getLatLong();
+            }
+
+            in.close();
+
+            Log.d("Utils::getExifLatLon", "getLatLong: missing");
         }
-
-        Log.d("Utils::getExifLatLon", "getLatLong: missing");
 
         return null;
     }

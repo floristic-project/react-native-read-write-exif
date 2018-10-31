@@ -1,5 +1,6 @@
 package com.floristicreactlibrary.tasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,12 +13,15 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.floristicreactlibrary.utils.Utils;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap> {
 
     private static final String E_LAT_LON_EXIF_ERROR = "E_LAT_LON_EXIF_ERROR";
     private static final String LAT = "lat";
     private static final String LON = "lon";
+
+    private WeakReference<Context> context;
 
     private File file;
 
@@ -27,9 +31,11 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     private Exception exception;
 
-    public ReadExifLatLonTask(@NonNull File file,
+    public ReadExifLatLonTask(Context context, @NonNull File file,
                             @Nullable Callback errorCallback, @Nullable Callback successCallback,
                             @Nullable Promise promise) {
+        this.context = new WeakReference<>(context);
+
         this.file = file;
 
         this.errorCallback = errorCallback;
@@ -43,22 +49,27 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
         if (this.file != null) {
             try {
-                float[] latlon = Utils.getExifLatLon(this.file);
+                Context ctx = this.context.get();
+                if (ctx != null) {
+                    double[] latlon = Utils.getExifLatLon(ctx, this.file);
 
-                Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
+                    Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
 
-                if (latlon != null && latlon.length == 2) {
-                    WritableMap map = new WritableNativeMap();
-                    map.putDouble(ReadExifLatLonTask.LAT, Float.valueOf(latlon[0]).doubleValue());
-                    map.putDouble(ReadExifLatLonTask.LON, Float.valueOf(latlon[1]).doubleValue());
-                    return map;
+                    if (latlon != null && latlon.length == 2) {
+                        WritableMap map = new WritableNativeMap();
+                        map.putDouble(ReadExifLatLonTask.LAT, latlon[0]);
+                        map.putDouble(ReadExifLatLonTask.LON, latlon[1]);
+                        return map;
+                    }
+                } else {
+                    Log.d("ReadExifLatLonTask", "failed: missing context");
                 }
             } catch (Exception e) {
                 this.exception = e;
             }
+        } else {
+            Log.d("ReadExifLatLonTask", "failed: missing file");
         }
-
-        Log.d("ReadExifLatLonTask", "failed: missing file");
 
         return null;
     }
