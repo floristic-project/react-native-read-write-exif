@@ -1,4 +1,4 @@
-package com.reactlibrary.tasks;
+package com.floristicreactlibrary.tasks;
 
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -8,7 +8,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
-import com.reactlibrary.utils.Utils;
+import com.floristicreactlibrary.utils.Utils;
 
 import java.io.File;
 

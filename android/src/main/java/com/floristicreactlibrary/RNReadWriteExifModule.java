@@ -1,5 +1,5 @@
 
-package com.reactlibrary;
+package com.floristicreactlibrary;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -10,9 +10,9 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.reactlibrary.tasks.CopyExifTask;
-import com.reactlibrary.tasks.ReadExifDateTask;
-import com.reactlibrary.tasks.ReadExifLatLonTask;
+import com.floristicreactlibrary.tasks.CopyExifTask;
+import com.floristicreactlibrary.tasks.ReadExifDateTask;
+import com.floristicreactlibrary.tasks.ReadExifLatLonTask;
 
 import java.io.File;
 import java.util.HashMap;

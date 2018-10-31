@@ -7,6 +7,8 @@ currently available for Android (iOS version is coming soon)
 
 `$ npm install react-native-read-write-exif --save`
 
+`$ npm install git+https://github.com/floristic-project/react-native-read-write-exif.git --save`
+
 ### Mostly automatic installation
 
 `$ react-native link react-native-read-write-exif`
@@ -15,8 +17,8 @@ currently available for Android (iOS version is coming soon)
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
-  - Add `import com.reactlibrary.RNReadWriteExifPackage;` to the imports at the top of the file
+1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+  - Add `import com.floristicreactlibrary.RNReadWriteExifPackage;` to the imports at the top of the file
   - Add `new RNReadWriteExifPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
   	```
@@ -58,7 +60,7 @@ try {
 /*
  * read exif date
  */
- 
+
  // callback version
 RNReadWriteExif.readExifDate(uri, (error) => {...}, (date) => {...});
 
@@ -73,7 +75,7 @@ try {
 /*
  * read exif geo data (GPS)
  */
- 
+
  // callback version
 RNReadWriteExif.readExifLatLon(uri, (error) => {...}, (Object) => {...});
 
@@ -88,4 +90,3 @@ try {
 
 RNReadWriteExif;
 ```
-  

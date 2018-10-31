@@ -1,4 +1,4 @@
-package com.reactlibrary.utils;
+package com.floristicreactlibrary.utils;
 
 import android.media.ExifInterface;
 

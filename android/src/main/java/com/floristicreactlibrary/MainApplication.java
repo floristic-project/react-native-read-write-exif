@@ -1,4 +1,4 @@
-package com.reactlibrary;
+package com.floristicreactlibrary;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
