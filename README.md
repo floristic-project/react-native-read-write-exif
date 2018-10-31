@@ -1,6 +1,8 @@
 
 # react-native-read-write-exif
 
+currently available for Android (iOS version is coming soon)
+
 ## Getting started
 
 `$ npm install react-native-read-write-exif --save`
@@ -10,14 +12,6 @@
 `$ react-native link react-native-read-write-exif`
 
 ### Manual installation
-
-
-#### iOS
-
-1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-2. Go to `node_modules` ➜ `react-native-read-write-exif` and add `RNReadWriteExif.xcodeproj`
-3. In XCode, in the project navigator, select your project. Add `libRNReadWriteExif.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-4. Run your project (`Cmd+R`)<
 
 #### Android
 
@@ -34,16 +28,15 @@
       compile project(':react-native-read-write-exif')
   	```
 
-#### Windows
-[Read it! :D](https://github.com/ReactWindows/react-native)
+#### iOS
 
-1. In Visual Studio add the `RNReadWriteExif.sln` in `node_modules/react-native-read-write-exif/windows/RNReadWriteExif.sln` folder to their solution, reference from their app.
-2. Open up your `MainPage.cs` app
-  - Add `using Read.Write.Exif.RNReadWriteExif;` to the usings at the top of the file
-  - Add `new RNReadWriteExifPackage()` to the `List<IReactPackage>` returned by the `Packages` method
-
+1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
+2. Go to `node_modules` ➜ `react-native-read-write-exif` and add `RNReadWriteExif.xcodeproj`
+3. In XCode, in the project navigator, select your project. Add `libRNReadWriteExif.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
+4. Run your project (`Cmd+R`)<
 
 ## Usage
+
 ```javascript
 import RNReadWriteExif from 'react-native-read-write-exif';
 
