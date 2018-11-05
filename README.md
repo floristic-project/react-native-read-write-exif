@@ -47,7 +47,7 @@ import RNReadWriteExif from 'react-native-read-write-exif';
  */
 
 // callback version
-RNReadWriteExif.copyExif(srcUri, destUri, (error) => {...}, (succeeded) => {...});
+RNReadWriteExif.copyExifCallback(srcUri, destUri, (error) => {...}, (succeeded) => {...});
 
 // promise version
 try {
@@ -62,7 +62,7 @@ try {
  */
 
  // callback version
-RNReadWriteExif.readExifDate(uri, (error) => {...}, (date) => {...});
+RNReadWriteExif.readExifDateCallback(uri, (error) => {...}, (date) => {...});
 
 // promise version
 try {
@@ -77,7 +77,7 @@ try {
  */
 
  // callback version
-RNReadWriteExif.readExifLatLon(uri, (error) => {...}, (Object) => {...});
+RNReadWriteExif.readExifLatLonCallback(uri, (error) => {...}, (Object) => {...});
 
 // promise version
 try {
