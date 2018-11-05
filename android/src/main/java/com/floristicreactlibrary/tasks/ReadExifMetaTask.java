@@ -1,6 +1,5 @@
 package com.floristicreactlibrary.tasks;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,10 +10,10 @@ import com.facebook.react.bridge.Promise;
 import com.floristicreactlibrary.utils.Utils;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 
 public class ReadExifMetaTask extends AsyncTask<Integer, Integer, String> {
 
+    private static final String MODULE_NAME = "ReadExifMetaTask";
     private static final String E_META_EXIF_ERROR = "E_META_EXIF_ERROR";
 
     private File file;
@@ -37,7 +36,7 @@ public class ReadExifMetaTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected String doInBackground(Integer... integers) {
-        Log.e("ReadExifMetaTask", "running");
+        Log.e(ReadExifMetaTask.MODULE_NAME, "running");
 
         if (this.file != null) {
             try {
@@ -46,7 +45,7 @@ public class ReadExifMetaTask extends AsyncTask<Integer, Integer, String> {
                 this.exception = e;
             }
         } else {
-            Log.e("ReadExifMetaTask", "failed: missing file");
+            Log.e(ReadExifMetaTask.MODULE_NAME, "failed: missing file");
         }
 
         return null;
@@ -54,9 +53,9 @@ public class ReadExifMetaTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Log.e("ReadExifMetaTask", "ending");
-        Log.e("ReadExifMetaTask", "date: " + (result != null ? result : "null"));
-        Log.e("ReadExifMetaTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e(ReadExifMetaTask.MODULE_NAME, "ending");
+        Log.e(ReadExifMetaTask.MODULE_NAME, "result: " + (result != null ? result : "null"));
+        Log.e(ReadExifMetaTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (this.exception == null) {
             if (this.promise != null) {

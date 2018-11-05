@@ -30,6 +30,8 @@ import java.util.List;
 
 public class Utils {
 
+    private static final String MODULE_NAME = "Utils";
+
     public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception {
         Exception finalException;
 
@@ -192,6 +194,8 @@ public class Utils {
     }
 
     public static String getExifDate(Context context, File file) throws IOException {
+        final String NAME = "getExifDate";
+
         Uri uri = Uri.fromFile(file);
         InputStream in;
         in = context.getContentResolver().openInputStream(uri);
@@ -199,37 +203,39 @@ public class Utils {
         if (in != null) {
             ExifInterface exif = new ExifInterface(in);
 
-            Log.e("Utils::getExifDate", "ExifInterface: ok");
+            Log.e(Utils.MODULE_NAME + "::" + NAME, "ExifInterface: ok");
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
-                Log.e("Utils::getExifDate", "TAG_DATETIME: found");
+                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED) != null) {
-                Log.e("Utils::getExifDate", "TAG_DATETIME_DIGITIZED: found");
+                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME_DIGITIZED: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) != null) {
-                Log.e("Utils::getExifDate", "TAG_DATETIME_ORIGINAL: found");
+                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME_ORIGINAL: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP) != null) {
-                Log.e("Utils::getExifDate", "TAG_GPS_DATESTAMP: found");
+                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_GPS_DATESTAMP: found");
                 return exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
             }
 
             in.close();
 
-            Log.e("Utils::getExifDate", "DATE: missing");
+            Log.e(Utils.MODULE_NAME + "::" + NAME, "DATE: missing");
         }
 
         return null;
     }
 
     public static double[] getExifLatLon(Context context, File file) throws IOException {
+        final String NAME = "getExifLatLon";
+
         Uri uri = Uri.fromFile(file);
         InputStream in;
         in = context.getContentResolver().openInputStream(uri);
@@ -237,23 +243,23 @@ public class Utils {
         if (in != null) {
             ExifInterface exif = new ExifInterface(in);
 
-            Log.e("Utils::getExifLatLon", "ExifInterface: ok");
+            Log.e(Utils.MODULE_NAME + "::" + NAME, "ExifInterface: ok");
 
             if (exif.getLatLong() != null) {
-                Log.e("Utils::getExifLatLon", "getLatLong: found");
+                Log.e(Utils.MODULE_NAME + "::" + NAME, "getLatLong: found");
                 return exif.getLatLong();
             }
 
             in.close();
 
-            Log.e("Utils::getExifLatLon", "getLatLong: missing");
+            Log.e(Utils.MODULE_NAME + "::" + NAME, "getLatLong: missing");
         }
 
         return null;
     }
 
     public static String readMetadata(File file) throws ImageReadException, IOException {
-        final String NAME = "printMetadata";
+        final String NAME = "readMetadata";
 
         String result = "" + NAME;
 

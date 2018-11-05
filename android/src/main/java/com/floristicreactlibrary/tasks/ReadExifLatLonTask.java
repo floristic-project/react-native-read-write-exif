@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference;
 
 public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap> {
 
+    private static final String MODULE_NAME = "ReadExifLatLonTask";
     private static final String E_LAT_LON_EXIF_ERROR = "E_LAT_LON_EXIF_ERROR";
     private static final String LAT = "lat";
     private static final String LON = "lon";
@@ -45,7 +46,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected WritableMap doInBackground(Integer... integers) {
-        Log.e("ReadExifLatLonTask", "running");
+        Log.e(ReadExifLatLonTask.MODULE_NAME, "running");
 
         if (this.file != null) {
             try {
@@ -53,7 +54,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                 if (ctx != null) {
                     double[] latlon = Utils.getExifLatLon(ctx, this.file);
 
-                    Log.e("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
+                    Log.e(ReadExifLatLonTask.MODULE_NAME, "latlon: " + (latlon != null ? latlon : "null"));
 
                     if (latlon != null && latlon.length == 2) {
                         WritableMap map = new WritableNativeMap();
@@ -62,13 +63,13 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                         return map;
                     }
                 } else {
-                    Log.e("ReadExifLatLonTask", "failed: missing context");
+                    Log.e(ReadExifLatLonTask.MODULE_NAME, "failed: missing context");
                 }
             } catch (Exception e) {
                 this.exception = e;
             }
         } else {
-            Log.e("ReadExifLatLonTask", "failed: missing file");
+            Log.e(ReadExifLatLonTask.MODULE_NAME, "failed: missing file");
         }
 
         return null;
@@ -76,9 +77,9 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected void onPostExecute(WritableMap latlon) {
-        Log.e("ReadExifLatLonTask", "ending");
-        Log.e("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon.toString() : "null"));
-        Log.e("ReadExifLatLonTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e(ReadExifLatLonTask.MODULE_NAME, "ending");
+        Log.e(ReadExifLatLonTask.MODULE_NAME, "latlon: " + (latlon != null ? latlon.toString() : "null"));
+        Log.e(ReadExifLatLonTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (this.exception == null) {
             if (this.promise != null) {

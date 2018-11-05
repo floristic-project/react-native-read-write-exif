@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 
 public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
+    private static final String MODULE_NAME = "ReadExifDateTask";
     private static final String E_DATE_EXIF_ERROR = "E_DATE_EXIF_ERROR";
 
     private WeakReference<Context> context;
@@ -41,7 +42,7 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected String doInBackground(Integer... integers) {
-        Log.e("ReadExifDateTask", "running");
+        Log.e(ReadExifDateTask.MODULE_NAME, "running");
 
         if (this.file != null) {
             try {
@@ -49,13 +50,13 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
                 if (ctx != null) {
                     return Utils.getExifDate(ctx, this.file);
                 } else {
-                    Log.e("ReadExifDateTask", "failed: missing context");
+                    Log.e(ReadExifDateTask.MODULE_NAME, "failed: missing context");
                 }
             } catch (Exception e) {
                 this.exception = e;
             }
         } else {
-            Log.e("ReadExifDateTask", "failed: missing file");
+            Log.e(ReadExifDateTask.MODULE_NAME, "failed: missing file");
         }
 
         return null;
@@ -63,9 +64,9 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected void onPostExecute(String date) {
-        Log.e("ReadExifDateTask", "ending");
-        Log.e("ReadExifDateTask", "date: " + (date != null ? date : "null"));
-        Log.e("ReadExifDateTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e(ReadExifDateTask.MODULE_NAME, "ending");
+        Log.e(ReadExifDateTask.MODULE_NAME, "date: " + (date != null ? date : "null"));
+        Log.e(ReadExifDateTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (this.exception == null) {
             if (this.promise != null) {

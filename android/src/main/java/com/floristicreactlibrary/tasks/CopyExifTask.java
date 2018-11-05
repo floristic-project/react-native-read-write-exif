@@ -13,6 +13,7 @@ import java.io.File;
 
 public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
+    private static final String MODULE_NAME = "CopyExifTask";
     private static final String E_COPY_EXIF_ERROR = "E_COPY_EXIF_ERROR";
 
     private File srcFile;
@@ -37,16 +38,16 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Integer... integers) {
-        Log.e("CopyExifTask", "running");
+        Log.e(CopyExifTask.MODULE_NAME, "running");
 
         if (this.srcFile != null && this.destFile != null) {
             try {
-                return Utils.copyExifData(this.srcFile, this.destFile, null);
+                return Utils.copyExifData(this.srcFile, this.destFile, null, true);
             } catch (Exception e) {
                 this.exception = e;
             }
         } else {
-            Log.e("CopyExifTask", "failed: missing file(s)");
+            Log.e(CopyExifTask.MODULE_NAME, "failed: missing file(s)");
         }
 
         return false;
@@ -54,9 +55,9 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean succeeded) {
-        Log.e("CopyExifTask", "ending");
-        Log.e("CopyExifTask", "succeeded: " + (succeeded != null ? succeeded : "null"));
-        Log.e("CopyExifTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e(CopyExifTask.MODULE_NAME, "ending");
+        Log.e(CopyExifTask.MODULE_NAME, "succeeded: " + (succeeded != null ? succeeded : "null"));
+        Log.e(CopyExifTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (succeeded != null && succeeded) {
             if (this.promise != null) {
