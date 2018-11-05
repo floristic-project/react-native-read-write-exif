@@ -9,8 +9,6 @@ import android.util.Log;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.floristicreactlibrary.utils.Utils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -48,7 +46,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
     protected WritableMap doInBackground(Integer... integers) {
         Log.e(ReadExifLatLonTask.MODULE_NAME, "running");
 
-        if (this.file != null) {
+        /*if (this.file != null) {
             try {
                 Context ctx = this.context.get();
                 if (ctx != null) {
@@ -70,12 +68,12 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
             }
         } else {
             Log.e(ReadExifLatLonTask.MODULE_NAME, "failed: missing file");
-        }
+        }*/
 
         return null;
     }
 
-    @Override
+    /*@Override
     protected void onPostExecute(WritableMap latlon) {
         Log.e(ReadExifLatLonTask.MODULE_NAME, "ending");
         Log.e(ReadExifLatLonTask.MODULE_NAME, "latlon: " + (latlon != null ? latlon.toString() : "null"));
@@ -96,5 +94,5 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                 );
             }
         }
-    }
+    }*/
 }

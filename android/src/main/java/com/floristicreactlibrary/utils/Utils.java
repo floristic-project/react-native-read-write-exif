@@ -1,8 +1,5 @@
 package com.floristicreactlibrary.utils;
 
-import android.content.Context;
-import android.net.Uri;
-import android.support.media.ExifInterface;
 import android.util.Log;
 
 import org.apache.sanselan.ImageReadException;
@@ -24,7 +21,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -193,7 +189,7 @@ public class Utils {
         return result;
     }
 
-    public static String getExifDate(Context context, File file) throws IOException {
+    /*public static String getExifDate(Context context, File file) throws IOException {
         final String NAME = "getExifDate";
 
         Uri uri = Uri.fromFile(file);
@@ -231,9 +227,9 @@ public class Utils {
         }
 
         return null;
-    }
+    }*/
 
-    public static double[] getExifLatLon(Context context, File file) throws IOException {
+    /*public static double[] getExifLatLon(Context context, File file) throws IOException {
         final String NAME = "getExifLatLon";
 
         Uri uri = Uri.fromFile(file);
@@ -256,7 +252,7 @@ public class Utils {
         }
 
         return null;
-    }
+    }*/
 
     public static String readMetadata(File file) throws ImageReadException, IOException {
         final String NAME = "readMetadata";

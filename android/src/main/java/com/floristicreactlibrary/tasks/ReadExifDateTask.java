@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
-import com.floristicreactlibrary.utils.Utils;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -44,7 +43,7 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
     protected String doInBackground(Integer... integers) {
         Log.e(ReadExifDateTask.MODULE_NAME, "running");
 
-        if (this.file != null) {
+        /*if (this.file != null) {
             try {
                 Context ctx = this.context.get();
                 if (ctx != null) {
@@ -57,12 +56,12 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
             }
         } else {
             Log.e(ReadExifDateTask.MODULE_NAME, "failed: missing file");
-        }
+        }*/
 
         return null;
     }
 
-    @Override
+    /*@Override
     protected void onPostExecute(String date) {
         Log.e(ReadExifDateTask.MODULE_NAME, "ending");
         Log.e(ReadExifDateTask.MODULE_NAME, "date: " + (date != null ? date : "null"));
@@ -83,5 +82,5 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
                 );
             }
         }
-    }
+    }*/
 }

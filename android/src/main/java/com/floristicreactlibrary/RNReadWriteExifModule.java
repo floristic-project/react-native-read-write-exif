@@ -12,8 +12,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.floristicreactlibrary.tasks.CopyExifTask;
-import com.floristicreactlibrary.tasks.ReadExifDateTask;
-import com.floristicreactlibrary.tasks.ReadExifLatLonTask;
 import com.floristicreactlibrary.tasks.ReadExifMetaTask;
 
 import java.io.File;
@@ -169,7 +167,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
         task.execute();
     }
 
-    @ReactMethod
+    /*@ReactMethod
     public void readExifDateCallback(String uri, Callback errorCallback, Callback successCallback) {
         File file;
 
@@ -208,9 +206,9 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                               @Nullable Promise promise) {
         ReadExifDateTask task = new ReadExifDateTask(this.reactContext, file, errorCallback, successCallback, promise);
         task.execute();
-    }
+    }*/
 
-    @ReactMethod
+    /*@ReactMethod
     public void readExifLatLonCallback(String uri, Callback errorCallback, Callback successCallback) {
         File file;
 
@@ -249,27 +247,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                               @Nullable Promise promise) {
         ReadExifLatLonTask task = new ReadExifLatLonTask(this.reactContext, file, errorCallback, successCallback, promise);
         task.execute();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }*/
 
     @ReactMethod
     public void readExifMetaCallback(String uri, Callback errorCallback, Callback successCallback) {
