@@ -9,8 +9,10 @@ import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.common.ImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.jpeg.exifRewrite.ExifRewriter;
+import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.TiffImageMetadata;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
@@ -179,31 +181,31 @@ public class Utils {
         if (in != null) {
             ExifInterface exif = new ExifInterface(in);
 
-            Log.d("Utils::getExifDate", "ExifInterface: ok");
+            Log.e("Utils::getExifDate", "ExifInterface: ok");
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
-                Log.d("Utils::getExifDate", "TAG_DATETIME: found");
+                Log.e("Utils::getExifDate", "TAG_DATETIME: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED) != null) {
-                Log.d("Utils::getExifDate", "TAG_DATETIME_DIGITIZED: found");
+                Log.e("Utils::getExifDate", "TAG_DATETIME_DIGITIZED: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) != null) {
-                Log.d("Utils::getExifDate", "TAG_DATETIME_ORIGINAL: found");
+                Log.e("Utils::getExifDate", "TAG_DATETIME_ORIGINAL: found");
                 return exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
             }
 
             if (exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP) != null) {
-                Log.d("Utils::getExifDate", "TAG_GPS_DATESTAMP: found");
+                Log.e("Utils::getExifDate", "TAG_GPS_DATESTAMP: found");
                 return exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
             }
 
             in.close();
 
-            Log.d("Utils::getExifDate", "DATE: missing");
+            Log.e("Utils::getExifDate", "DATE: missing");
         }
 
         return null;
@@ -217,18 +219,80 @@ public class Utils {
         if (in != null) {
             ExifInterface exif = new ExifInterface(in);
 
-            Log.d("Utils::getExifLatLon", "ExifInterface: ok");
+            Log.e("Utils::getExifLatLon", "ExifInterface: ok");
 
             if (exif.getLatLong() != null) {
-                Log.d("Utils::getExifLatLon", "getLatLong: found");
+                Log.e("Utils::getExifLatLon", "getLatLong: found");
                 return exif.getLatLong();
             }
 
             in.close();
 
-            Log.d("Utils::getExifLatLon", "getLatLong: missing");
+            Log.e("Utils::getExifLatLon", "getLatLong: missing");
         }
 
         return null;
+    }
+
+    public static String readMetadata(File file) throws ImageReadException, IOException {
+        final String NAME = "printMetadata";
+
+        String result = "" + NAME;
+
+        IImageMetadata sanselanMetadata = Sanselan.getMetadata(file);
+
+        if (sanselanMetadata instanceof JpegImageMetadata) {
+            JpegImageMetadata jpegMetadata = (JpegImageMetadata) sanselanMetadata;
+            TiffImageMetadata tiffImageMetadata = jpegMetadata.getExif();
+
+            result += "\n" + "meta: ";
+            Log.e(NAME, "meta: ");
+            result += Utils.getMetadataList(jpegMetadata.getItems());
+
+            result += "\n" + "exif: ";
+            Log.e(NAME, "exif: ");
+            result += Utils.getExif(tiffImageMetadata);
+
+            result += "\n" + "gps: ";
+            Log.e(NAME, "gps: ");
+            TiffImageMetadata.GPSInfo gpsInfo = tiffImageMetadata.getGPS();
+            result += gpsInfo.toString();
+            Log.e(" - ", gpsInfo.toString());
+        }
+
+        return result;
+    }
+
+    private static String getMetadataList(List items) {
+        StringBuilder result = new StringBuilder();
+
+        for (Object item : items) {
+            if (item instanceof ImageMetadata.Item) {
+                ImageMetadata.Item tiffItem = (ImageMetadata.Item) item;
+                Log.e(" - ", tiffItem.getText());
+                Log.e(" - ", tiffItem.toString());
+
+                result.append("\n").append(tiffItem.getText());
+                result.append("\n").append(tiffItem.toString());
+            }
+        }
+
+        return result.toString();
+    }
+
+    private static String getExif(TiffImageMetadata tiffImageMetadata) throws ImageReadException {
+        StringBuilder result = new StringBuilder();
+
+        for(Object field: tiffImageMetadata.getAllFields()) {
+            if(field instanceof TiffField) {
+                TiffField tiffField = (TiffField)field;
+
+                result.append(tiffField.getTagName()).append(": ").append(tiffField.getValueDescription());
+
+                Log.e(" - ", tiffField.getTagName()+ ": " + tiffField.getValueDescription());
+            }
+        }
+
+        return result.toString();
     }
 }

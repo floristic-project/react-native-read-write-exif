@@ -14,6 +14,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.floristicreactlibrary.tasks.CopyExifTask;
 import com.floristicreactlibrary.tasks.ReadExifDateTask;
 import com.floristicreactlibrary.tasks.ReadExifLatLonTask;
+import com.floristicreactlibrary.tasks.ReadExifMetaTask;
 
 import java.io.File;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             srcFile = new File(Uri.parse(srcUri).getPath());
             this.checkFileExists(srcFile);
 
-            Log.d("copyExifCallback", "file exists (r/w): " + srcUri);
+            Log.e("copyExifCallback", "file exists (r/w): " + srcUri);
         } catch (Exception e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
             return;
@@ -124,7 +125,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             destFile = new File(Uri.parse(destUri).getPath());
             this.checkFileExists(destFile);
 
-            Log.d("copyExifCallback", "file exists (r/w): " + destUri);
+            Log.e("copyExifCallback", "file exists (r/w): " + destUri);
         } catch (Exception e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + e.getMessage());
             return;
@@ -142,7 +143,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             srcFile = new File(Uri.parse(srcUri).getPath());
             this.checkFileExists(srcFile);
 
-            Log.d("copyExifPromise", "file exists (r/w): " + srcUri);
+            Log.e("copyExifPromise", "file exists (r/w): " + srcUri);
         } catch (Exception e) {
             promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
             return;
@@ -152,7 +153,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             destFile = new File(Uri.parse(destUri).getPath());
             this.checkFileExists(destFile);
 
-            Log.d("copyExifPromise", "file exists (r/w): " + destUri);
+            Log.e("copyExifPromise", "file exists (r/w): " + destUri);
         } catch (Exception e) {
             promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, e);
             return;
@@ -176,7 +177,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             file = new File(Uri.parse(uri).getPath());
             this.checkFileExists(file);
 
-            Log.d("readExifDateCallback", "file exists (r/w): " + uri);
+            Log.e("readExifDateCallback", "file exists (r/w): " + uri);
         } catch (Exception e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
             return;
@@ -193,7 +194,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             file = new File(Uri.parse(uri).getPath());
             this.checkFileExists(file);
 
-            Log.d("readExifDatePromise", "file exists (r/w): " + uri);
+            Log.e("readExifDatePromise", "file exists (r/w): " + uri);
         } catch (Exception e) {
             promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
             return;
@@ -217,7 +218,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             file = new File(Uri.parse(uri).getPath());
             this.checkFileExists(file);
 
-            Log.d("readExifLatLonCallback", "file exists (r/w): " + uri);
+            Log.e("readExifLatLonCallback", "file exists (r/w): " + uri);
         } catch (Exception e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
             return;
@@ -234,7 +235,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             file = new File(Uri.parse(uri).getPath());
             this.checkFileExists(file);
 
-            Log.d("readExifLatLonPromise", "file exists (r/w): " + uri);
+            Log.e("readExifLatLonPromise", "file exists (r/w): " + uri);
         } catch (Exception e) {
             promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
             return;
@@ -247,6 +248,67 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                               @Nullable Callback errorCallback, @Nullable Callback successCallback,
                               @Nullable Promise promise) {
         ReadExifLatLonTask task = new ReadExifLatLonTask(this.reactContext, file, errorCallback, successCallback, promise);
+        task.execute();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @ReactMethod
+    public void readExifMetaCallback(String uri, Callback errorCallback, Callback successCallback) {
+        File file;
+
+        try {
+            file = new File(Uri.parse(uri).getPath());
+            this.checkFileExists(file);
+
+            Log.e("readExifMetaCallback", "file exists (r/w): " + uri);
+        } catch (Exception e) {
+            errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
+            return;
+        }
+
+        this.readExifMeta(file, errorCallback, successCallback, null);
+    }
+
+    @ReactMethod
+    public void readExifMetaPromise(String uri, Promise promise) {
+        File file;
+
+        try {
+            file = new File(Uri.parse(uri).getPath());
+            this.checkFileExists(file);
+
+            Log.e("readExifMetaPromise", "file exists (r/w): " + uri);
+        } catch (Exception e) {
+            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
+            return;
+        }
+
+        this.readExifMeta(file, null, null, promise);
+    }
+
+    private void readExifMeta(@NonNull File file,
+                              @Nullable Callback errorCallback, @Nullable Callback successCallback,
+                              @Nullable Promise promise) {
+        ReadExifMetaTask task = new ReadExifMetaTask(file, errorCallback, successCallback, promise);
         task.execute();
     }
 }

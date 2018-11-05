@@ -41,7 +41,7 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected String doInBackground(Integer... integers) {
-        Log.d("ReadExifDateTask", "running");
+        Log.e("ReadExifDateTask", "running");
 
         if (this.file != null) {
             try {
@@ -49,13 +49,13 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
                 if (ctx != null) {
                     return Utils.getExifDate(ctx, this.file);
                 } else {
-                    Log.d("ReadExifDateTask", "failed: missing context");
+                    Log.e("ReadExifDateTask", "failed: missing context");
                 }
             } catch (Exception e) {
                 this.exception = e;
             }
         } else {
-            Log.d("ReadExifDateTask", "failed: missing file");
+            Log.e("ReadExifDateTask", "failed: missing file");
         }
 
         return null;
@@ -63,9 +63,9 @@ public class ReadExifDateTask extends AsyncTask<Integer, Integer, String> {
 
     @Override
     protected void onPostExecute(String date) {
-        Log.d("ReadExifDateTask", "ending");
-        Log.d("ReadExifDateTask", "date: " + (date != null ? date : "null"));
-        Log.d("ReadExifDateTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e("ReadExifDateTask", "ending");
+        Log.e("ReadExifDateTask", "date: " + (date != null ? date : "null"));
+        Log.e("ReadExifDateTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (this.exception == null) {
             if (this.promise != null) {

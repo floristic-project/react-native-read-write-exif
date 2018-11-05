@@ -37,7 +37,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Integer... integers) {
-        Log.d("CopyExifTask", "running");
+        Log.e("CopyExifTask", "running");
 
         if (this.srcFile != null && this.destFile != null) {
             try {
@@ -46,7 +46,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
                 this.exception = e;
             }
         } else {
-            Log.d("CopyExifTask", "failed: missing file(s)");
+            Log.e("CopyExifTask", "failed: missing file(s)");
         }
 
         return false;
@@ -54,9 +54,9 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean succeeded) {
-        Log.d("CopyExifTask", "ending");
-        Log.d("CopyExifTask", "succeeded: " + (succeeded != null ? succeeded : "null"));
-        Log.d("CopyExifTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e("CopyExifTask", "ending");
+        Log.e("CopyExifTask", "succeeded: " + (succeeded != null ? succeeded : "null"));
+        Log.e("CopyExifTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (succeeded != null && succeeded) {
             if (this.promise != null) {

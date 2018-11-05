@@ -45,7 +45,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected WritableMap doInBackground(Integer... integers) {
-        Log.d("ReadExifLatLonTask", "running");
+        Log.e("ReadExifLatLonTask", "running");
 
         if (this.file != null) {
             try {
@@ -53,7 +53,7 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                 if (ctx != null) {
                     double[] latlon = Utils.getExifLatLon(ctx, this.file);
 
-                    Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
+                    Log.e("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon : "null"));
 
                     if (latlon != null && latlon.length == 2) {
                         WritableMap map = new WritableNativeMap();
@@ -62,13 +62,13 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
                         return map;
                     }
                 } else {
-                    Log.d("ReadExifLatLonTask", "failed: missing context");
+                    Log.e("ReadExifLatLonTask", "failed: missing context");
                 }
             } catch (Exception e) {
                 this.exception = e;
             }
         } else {
-            Log.d("ReadExifLatLonTask", "failed: missing file");
+            Log.e("ReadExifLatLonTask", "failed: missing file");
         }
 
         return null;
@@ -76,9 +76,9 @@ public class ReadExifLatLonTask extends AsyncTask<Integer, Integer, WritableMap>
 
     @Override
     protected void onPostExecute(WritableMap latlon) {
-        Log.d("ReadExifLatLonTask", "ending");
-        Log.d("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon.toString() : "null"));
-        Log.d("ReadExifLatLonTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.e("ReadExifLatLonTask", "ending");
+        Log.e("ReadExifLatLonTask", "latlon: " + (latlon != null ? latlon.toString() : "null"));
+        Log.e("ReadExifLatLonTask", "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
 
         if (this.exception == null) {
             if (this.promise != null) {
