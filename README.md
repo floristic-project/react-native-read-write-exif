@@ -7,6 +7,8 @@ currently available for Android (iOS version is coming soon)
 
 `$ npm install react-native-read-write-exif --save`
 
+or
+
 `$ npm install git+https://github.com/floristic-project/react-native-read-write-exif.git --save`
 
 ### Mostly automatic installation
@@ -42,51 +44,92 @@ currently available for Android (iOS version is coming soon)
 ```javascript
 import RNReadWriteExif from 'react-native-read-write-exif';
 
-/*
- * copy exif from src to dest
- */
+/* ******* ******* ******* ******* ******* ******* *******
+ * COPY EXIF from src to dest
+ ******* ******* ******* ******* ******* ******* ******* */
 
 // callback version
-RNReadWriteExif.copyExifCallback(srcUri, destUri, (error) => {...}, (succeeded) => {...});
+RNReadWriteExif.copyExifCallback(srcUri, destUri,
+(error) => {
+	console.log(error);
+},
+(succeeded) => {
+	console.log(succeeded); // true or false
+});
 
 // promise version
 try {
 	const succeeded = await RNReadWriteExif.copyExifPromise(srcUri, destUri);
-	console.log(succeeded);
+	console.log(succeeded); // true or false
 } catch (error) {
 	console.log(error);
 }
 
-/*
- * read exif date
- */
+/* ******* ******* ******* ******* ******* ******* *******
+ * READ EXIF DATE
+ ******* ******* ******* ******* ******* ******* ******* */
 
  // callback version
-RNReadWriteExif.readExifDateCallback(uri, (error) => {...}, (date) => {...});
+RNReadWriteExif.readExifDateCallback(uri,
+(error) => {
+	console.log(error);
+},
+(date) => {
+	console.log(date); // "a string date"
+});
 
 // promise version
 try {
 	const date = await RNReadWriteExif.readExifDatePromise(uri);
-	console.log(date);
+	console.log(date); // "a string date"
 } catch (error) {
 	console.log(error);
 }
 
-/*
- * read exif geo data (GPS)
- */
+/* ******* ******* ******* ******* ******* ******* *******
+ * READ EXIF GEO DATA (GPS)
+ ******* ******* ******* ******* ******* ******* ******* */
 
  // callback version
-RNReadWriteExif.readExifLatLonCallback(uri, (error) => {...}, (Object) => {...});
+RNReadWriteExif.readExifLatLonCallback(uri,
+(error) => {
+	console.log(error);
+},
+(geo) => {
+	console.log(geo); // { lat: 43.01, lon: 3.01 }
+});
 
 // promise version
 try {
 	const { lat, lon } = await RNReadWriteExif.readExifLatLonPromise(uri);
-	console.log(lat);
-	console.log(lon);
+	console.log(lat); // 43.01
+	console.log(lon); // 3.01
 } catch (error) {
 	console.log(error);
 }
+
+/* ******* ******* ******* ******* ******* ******* *******
+ * READ EXIF & META
+ ******* ******* ******* ******* ******* ******* ******* */
+
+ // callback version
+RNReadWriteExif.readExifMetaCallback(uri,
+(error) => {
+	console.log(error);
+},
+(result) => {
+	console.log(result); // "a string with all readable data"
+});
+
+// promise version
+try {
+	const result = await RNReadWriteExif.readExifMetaPromise(uri);
+	console.log(result); // "a string with all readable data"
+} catch (error) {
+	console.log(error);
+}
+
+//
 
 RNReadWriteExif;
 ```
