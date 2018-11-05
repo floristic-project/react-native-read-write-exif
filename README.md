@@ -1,6 +1,8 @@
 
 # react-native-read-write-exif
 
+copy exif from src to dest
+
 currently available for Android (iOS version is coming soon)
 
 ## Getting started
@@ -45,10 +47,9 @@ or
 import RNReadWriteExif from 'react-native-read-write-exif';
 
 /* ******* ******* ******* ******* ******* ******* *******
- * COPY EXIF from src to dest
+ * CALLBACK VERSION
  ******* ******* ******* ******* ******* ******* ******* */
 
-// callback version
 RNReadWriteExif.copyExifCallback(srcUri, destUri,
 (error) => {
 	console.log(error);
@@ -57,74 +58,13 @@ RNReadWriteExif.copyExifCallback(srcUri, destUri,
 	console.log(succeeded); // true or false
 });
 
-// promise version
+/* ******* ******* ******* ******* ******* ******* *******
+ * PROMISE VERSION
+ ******* ******* ******* ******* ******* ******* ******* */
+ 
 try {
 	const succeeded = await RNReadWriteExif.copyExifPromise(srcUri, destUri);
 	console.log(succeeded); // true or false
-} catch (error) {
-	console.log(error);
-}
-
-/* ******* ******* ******* ******* ******* ******* *******
- * READ EXIF DATE
- ******* ******* ******* ******* ******* ******* ******* */
-
- // callback version
-RNReadWriteExif.readExifDateCallback(uri,
-(error) => {
-	console.log(error);
-},
-(date) => {
-	console.log(date); // "a string date"
-});
-
-// promise version
-try {
-	const date = await RNReadWriteExif.readExifDatePromise(uri);
-	console.log(date); // "a string date"
-} catch (error) {
-	console.log(error);
-}
-
-/* ******* ******* ******* ******* ******* ******* *******
- * READ EXIF GEO DATA (GPS)
- ******* ******* ******* ******* ******* ******* ******* */
-
- // callback version
-RNReadWriteExif.readExifLatLonCallback(uri,
-(error) => {
-	console.log(error);
-},
-(geo) => {
-	console.log(geo); // { lat: 43.01, lon: 3.01 }
-});
-
-// promise version
-try {
-	const { lat, lon } = await RNReadWriteExif.readExifLatLonPromise(uri);
-	console.log(lat); // 43.01
-	console.log(lon); // 3.01
-} catch (error) {
-	console.log(error);
-}
-
-/* ******* ******* ******* ******* ******* ******* *******
- * READ EXIF & META
- ******* ******* ******* ******* ******* ******* ******* */
-
- // callback version
-RNReadWriteExif.readExifMetaCallback(uri,
-(error) => {
-	console.log(error);
-},
-(result) => {
-	console.log(result); // "a string with all readable data"
-});
-
-// promise version
-try {
-	const result = await RNReadWriteExif.readExifMetaPromise(uri);
-	console.log(result); // "a string with all readable data"
 } catch (error) {
 	console.log(error);
 }

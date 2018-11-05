@@ -1,15 +1,11 @@
 package com.floristicreactlibrary.utils;
 
-import android.util.Log;
-
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.common.ImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.jpeg.exifRewrite.ExifRewriter;
-import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.TiffImageMetadata;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
@@ -26,8 +22,7 @@ import java.util.List;
 
 public class Utils {
 
-    private static final String MODULE_NAME = "Utils";
-
+    @SuppressWarnings({"ResultOfMethodCallIgnored", "EmptyCatchBlock", "ConstantConditions"})
     public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception {
         Exception finalException;
 
@@ -187,132 +182,5 @@ public class Utils {
         }
 
         return result;
-    }
-
-    /*public static String getExifDate(Context context, File file) throws IOException {
-        final String NAME = "getExifDate";
-
-        Uri uri = Uri.fromFile(file);
-        InputStream in;
-        in = context.getContentResolver().openInputStream(uri);
-
-        if (in != null) {
-            ExifInterface exif = new ExifInterface(in);
-
-            Log.e(Utils.MODULE_NAME + "::" + NAME, "ExifInterface: ok");
-
-            if (exif.getAttribute(ExifInterface.TAG_DATETIME) != null) {
-                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME: found");
-                return exif.getAttribute(ExifInterface.TAG_DATETIME);
-            }
-
-            if (exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED) != null) {
-                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME_DIGITIZED: found");
-                return exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
-            }
-
-            if (exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL) != null) {
-                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_DATETIME_ORIGINAL: found");
-                return exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
-            }
-
-            if (exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP) != null) {
-                Log.e(Utils.MODULE_NAME + "::" + NAME, "TAG_GPS_DATESTAMP: found");
-                return exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP);
-            }
-
-            in.close();
-
-            Log.e(Utils.MODULE_NAME + "::" + NAME, "DATE: missing");
-        }
-
-        return null;
-    }*/
-
-    /*public static double[] getExifLatLon(Context context, File file) throws IOException {
-        final String NAME = "getExifLatLon";
-
-        Uri uri = Uri.fromFile(file);
-        InputStream in;
-        in = context.getContentResolver().openInputStream(uri);
-
-        if (in != null) {
-            ExifInterface exif = new ExifInterface(in);
-
-            Log.e(Utils.MODULE_NAME + "::" + NAME, "ExifInterface: ok");
-
-            if (exif.getLatLong() != null) {
-                Log.e(Utils.MODULE_NAME + "::" + NAME, "getLatLong: found");
-                return exif.getLatLong();
-            }
-
-            in.close();
-
-            Log.e(Utils.MODULE_NAME + "::" + NAME, "getLatLong: missing");
-        }
-
-        return null;
-    }*/
-
-    public static String readMetadata(File file) throws ImageReadException, IOException {
-        final String NAME = "readMetadata";
-
-        String result = "" + NAME;
-
-        IImageMetadata sanselanMetadata = Sanselan.getMetadata(file);
-
-        if (sanselanMetadata instanceof JpegImageMetadata) {
-            JpegImageMetadata jpegMetadata = (JpegImageMetadata) sanselanMetadata;
-            TiffImageMetadata tiffImageMetadata = jpegMetadata.getExif();
-
-            result += "\n" + "meta: ";
-            Log.e(NAME, "meta: ");
-            result += Utils.getMetadataList(jpegMetadata.getItems());
-
-            result += "\n" + "exif: ";
-            Log.e(NAME, "exif: ");
-            result += Utils.getExif(tiffImageMetadata);
-
-            result += "\n" + "gps: ";
-            Log.e(NAME, "gps: ");
-            TiffImageMetadata.GPSInfo gpsInfo = tiffImageMetadata.getGPS();
-            result += gpsInfo.toString();
-            Log.e(" - ", gpsInfo.toString());
-        }
-
-        return result;
-    }
-
-    private static String getMetadataList(List items) {
-        StringBuilder result = new StringBuilder();
-
-        for (Object item : items) {
-            if (item instanceof ImageMetadata.Item) {
-                ImageMetadata.Item tiffItem = (ImageMetadata.Item) item;
-                Log.e(" - ", tiffItem.getText());
-                Log.e(" - ", tiffItem.toString());
-
-                result.append("\n").append(tiffItem.getText());
-                result.append("\n").append(tiffItem.toString());
-            }
-        }
-
-        return result.toString();
-    }
-
-    private static String getExif(TiffImageMetadata tiffImageMetadata) throws ImageReadException {
-        StringBuilder result = new StringBuilder();
-
-        for(Object field: tiffImageMetadata.getAllFields()) {
-            if(field instanceof TiffField) {
-                TiffField tiffField = (TiffField)field;
-
-                result.append(tiffField.getTagName()).append(": ").append(tiffField.getValueDescription());
-
-                Log.e(" - ", tiffField.getTagName()+ ": " + tiffField.getValueDescription());
-            }
-        }
-
-        return result.toString();
     }
 }
