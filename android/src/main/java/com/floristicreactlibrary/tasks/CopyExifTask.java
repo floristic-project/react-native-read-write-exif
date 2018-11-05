@@ -45,9 +45,9 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
             } catch (Exception e) {
                 this.exception = e;
             }
+        } else {
+            Log.d("CopyExifTask", "failed: missing file(s)");
         }
-
-        Log.d("CopyExifTask", "failed: missing file(s)");
 
         return false;
     }
