@@ -30,7 +30,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields) throws Exception {
+    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception {
         Exception finalException;
 
         String tempFileName = destFile.getAbsolutePath() + ".tmp";
@@ -65,7 +65,25 @@ public class Utils {
                     continue; // failed to create
                 }
 
-                // Loop the fields
+                if (resetExif != null && resetExif) {
+                    // Loop the fields (destination)
+                    List<?> destinationFields = destinationDirectory.getFields();
+                    for (int j = 0; j < destinationFields.size(); j++) {
+                        // Get the source field
+                        TiffOutputField destinationField = (TiffOutputField) destinationFields.get(j);
+
+                        // Check exclusion list
+                        if (excludedFields != null && excludedFields.contains(destinationField.tagInfo)) {
+                            destinationDirectory.removeField(destinationField.tagInfo);
+                            continue;
+                        }
+
+                        // Remove any existing field
+                        destinationDirectory.removeField(destinationField.tagInfo);
+                    }
+                }
+
+                // Loop the fields (source)
                 List<?> sourceFields = sourceDirectory.getFields();
                 for (int j = 0; j < sourceFields.size(); j++) {
                     // Get the source field
