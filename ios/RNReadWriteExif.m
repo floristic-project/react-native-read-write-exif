@@ -101,19 +101,104 @@ RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri
 				successCallback:(RCTResponseSenderBlock)successCallback)
 {
 	RCTLogInfo(@"copyExifCallback from %@ to %@", srcUri, destUri);
-	// errorCallback(@[srcUri, [NSNull null]]);
-	successCallback(@[srcUri, [NSNull null]]);
+
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+
+	if (![fileManager fileExistsAtPath:srcUri]) {
+		NSError *error = [NSError errorWithDomain:@"com.floristicreactlibrary"
+									code:404
+									userInfo:@"src file not found"];
+		errorCallback(@[error, [NSNull null]]);
+		return;
+	}
+
+	if (![fileManager fileExistsAtPath:destUri]) {
+		NSError *error = [NSError errorWithDomain:@"com.floristicreactlibrary"
+									code:404
+									userInfo:@"dest file not found"];
+		errorCallback(@[error, [NSNull null]]);
+		return;
+	}
+
+	@try {
+		UIImage *srcImage = [UIImage imageWithContentsOfFile:srcUri];
+		UIImage *destImage = [UIImage imageWithContentsOfFile:destUri];
+
+		successCallback(@[[self copyExifFrom:srcImage to:destImage], [NSNull null]]);
+	}
+	@catch (NSException *exception) {
+		NSMutableDictionary * info = [NSMutableDictionary dictionary];
+	    [info setValue:exception.name forKey:@"ExceptionName"];
+	    [info setValue:exception.reason forKey:@"ExceptionReason"];
+	    [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
+	    [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
+	    [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
+
+	    NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
+											code:404 userInfo:info];
+
+		errorCallback(@[error, [NSNull null]]);
+	}
 }
 
-RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri
-				destUri:(NSString *)destUri
+RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
 				resolver:(RCTPromiseResolveBlock)resolve
-				rejecter:(RCTPromiseRejectBlock)reject)
-{
+				rejecter:(RCTPromiseRejectBlock)reject) {
 	RCTLogInfo(@"copyExifPromise from %@ to %@", srcUri, destUri);
-	// NSError *error = ...
-	// reject(@"no_events", @"There were no events", error);
-	resolve(srcUri);
+
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+
+	if (![fileManager fileExistsAtPath:srcUri]) {
+		NSError *error = [NSError errorWithDomain:@"com.floristicreactlibrary"
+									code:404
+									userInfo:@"src file not found"];
+		reject(@"missing_file", @"File at srcUri not found", error);
+		return;
+	}
+
+	if (![fileManager fileExistsAtPath:destUri]) {
+		NSError *error = [NSError errorWithDomain:@"com.floristicreactlibrary"
+									code:404
+									userInfo:@"dest file not found"];
+		reject(@"missing_file", @"File at destUri not found", error);
+		return;
+	}
+
+	@try {
+		UIImage *srcImage = [UIImage imageWithContentsOfFile:srcUri];
+		UIImage *destImage = [UIImage imageWithContentsOfFile:destUri];
+
+		resolve([self copyExifFrom:srcImage to:destImage]);
+	}
+	@catch (NSException *exception) {
+		NSMutableDictionary * info = [NSMutableDictionary dictionary];
+	    [info setValue:exception.name forKey:@"ExceptionName"];
+	    [info setValue:exception.reason forKey:@"ExceptionReason"];
+	    [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
+	    [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
+	    [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
+
+	    NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
+											code:404 userInfo:info];
+
+	    reject(@"reading_file", @"File cannot be read", error);
+	}
+}
+
+- (BOOL) copyExifFrom:(UIImage *)src to:(UIImage *)dest {
+	// original data (from src)
+	NSData* srcData = UIImageJPEGRepresentation(src, 1.0);
+	// get metadata (includes the EXIF data)
+	CGImageSourceRef srcSource = CGImageSourceCreateWithData((CFDataRef)srcData, NULL);
+	NSDictionary *srcMetadata = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(srcSource,0,NULL);
+
+	// get the assets library
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+
+	// get the src image metadata (EXIF & TIFF)
+    NSMutableDictionary * imageMetadata = [[srcMetadata objectForKey:UIImagePickerControllerMediaMetadata] mutableCopy];
+
+	CFRelease(srcSource);
 }
 
 @end
