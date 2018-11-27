@@ -154,7 +154,7 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
     // open source and dest images
     try {
         NSData *imageData = [NSData dataWithContentsOfFile:src];
-        UIImage *stubImage = [UIImage imageNamed:dest];
+        NSData *stubData = [NSData dataWithContentsOfFile:dest];
     }
     @catch (NSException *exception) {
         NSMutableDictionary * info = [NSMutableDictionary dictionary];
@@ -174,52 +174,24 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
     CGImageSourceRef  cgSource ;
     cgSource = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, NULL);
     NSDictionary *metadataNew = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(cgSource,0,NULL);
-    NSDictionary *tiffDic = [metadataNew objectForKey:(NSString *)kCGImagePropertyTIFFDictionary];
 
-    // extract date
-    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-    [dateFormat setDateFormat:@"yyyy:MM:dd HH:mm:ss"];
-    NSDate *dateTime = [dateFormat dateFromString:[tiffDic objectForKey:(NSString *)kCGImagePropertyTIFFDateTime]];
-    //NSLog(@"Image Date from tiffDict: %@", dateTime);
+    // write metadata to dest image
+    CFStringRef UTI = CGImageSourceGetType(cgSource); // image mimetype
+    NSMutableData *dest_data = [NSMutableData data];
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((CFMutableDataRef)dest_data,UTI,1,NULL);
+    // inject stub image into destination image
+    CGImageSourceRef cgStub = CGImageSourceCreateWithData((__bridge CFDataRef)stubData, NULL);
+    CGImageDestinationAddImageFromSource(destination,cgStub,0, (CFDictionaryRef) metadataNew);
 
-    // extract geolocation
-    CLLocation *location = nil;
-    NSDictionary *gpsData = [metadataNew objectForKey:(NSString *)kCGImagePropertyGPSDictionary];
-    // ensure location services are enabled @TODO or not ?
-    if ([gpsData objectForKey:(NSString *)kCGImagePropertyGPSLatitude]
-        && [CLLocationManager locationServicesEnabled]
-        && [CLLocationManager authorizationStatus] != kCLAuthorizationStatusDenied)
-    {
-        double lat = [ [gpsData objectForKey:(NSString *)kCGImagePropertyGPSLatitude] doubleValue];
-        double lon = [ [gpsData objectForKey:(NSString *)kCGImagePropertyGPSLongitude] doubleValue];
-        // lat is negative if direction is south
-        if ([[gpsData valueForKey:@"LatitudeRef"] isEqualToString:@"S"]) {
-            lat = -lat;
-        }
-        // lng is negative if direction is west
-        if ([[gpsData valueForKey:@"LongitudeRef"] isEqualToString:@"W"]) {
-            lon = -lon;
-        }
-        CLLocationDegrees *latitude = &lat;
-        CLLocationDegrees *longitude = &lon;
-        location = [[CLLocation alloc] initWithLatitude:*latitude longitude:*longitude];
-        //NSLog(@"GPS position from metadata: %@", location);
-    }
+    CGImageDestinationFinalize(destination); // @WARNING this might return false (BOOL:NO)
 
-    // write with SimpleExif
-    ExifContainer *container = [[ExifContainer alloc] init];
-    //[container addUserComment:@"iOS sent mauvais de l'arriere-train !"];
-    if (dateTime != nil) {
-        [container addCreationDate:dateTime];
-    }
-    if (location != nil) {
-        [container addLocation:location];
-    }
-    // add to destination file and save
-    NSData *newImageData = [stubImage addExif:container];
-    [newImageData writeToFile:dest atomically:TRUE];
+    //overwrite destination file
+    [dest_data writeToFile:dest atomically:YES];
 
+    // free memory
 	CFRelease(cgSource);
+    CFRelease(cgStub);
+    CFRelease(destination);
 }
 
 @end
