@@ -120,25 +120,7 @@ RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri
 		return;
 	}
 
-	@try {
-		UIImage *srcImage = [UIImage imageWithContentsOfFile:srcUri];
-		UIImage *destImage = [UIImage imageWithContentsOfFile:destUri];
-
-		successCallback(@[[self copyExifFrom:srcImage to:destImage], [NSNull null]]);
-	}
-	@catch (NSException *exception) {
-		NSMutableDictionary * info = [NSMutableDictionary dictionary];
-	    [info setValue:exception.name forKey:@"ExceptionName"];
-	    [info setValue:exception.reason forKey:@"ExceptionReason"];
-	    [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
-	    [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
-	    [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
-
-	    NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
-											code:404 userInfo:info];
-
-		errorCallback(@[error, [NSNull null]]);
-	}
+    successCallback(@[[self copyExifFrom:srcUri to:destUri], [NSNull null]]);
 }
 
 RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
@@ -164,41 +146,80 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
 		return;
 	}
 
-	@try {
-		UIImage *srcImage = [UIImage imageWithContentsOfFile:srcUri];
-		UIImage *destImage = [UIImage imageWithContentsOfFile:destUri];
-
-		resolve([self copyExifFrom:srcImage to:destImage]);
-	}
-	@catch (NSException *exception) {
-		NSMutableDictionary * info = [NSMutableDictionary dictionary];
-	    [info setValue:exception.name forKey:@"ExceptionName"];
-	    [info setValue:exception.reason forKey:@"ExceptionReason"];
-	    [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
-	    [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
-	    [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
-
-	    NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
-											code:404 userInfo:info];
-
-	    reject(@"reading_file", @"File cannot be read", error);
-	}
+    resolve([self copyExifFrom:srcUri to:destUri]);
 }
 
-- (BOOL) copyExifFrom:(UIImage *)src to:(UIImage *)dest {
-	// original data (from src)
-	NSData* srcData = UIImageJPEGRepresentation(src, 1.0);
-	// get metadata (includes the EXIF data)
-	CGImageSourceRef srcSource = CGImageSourceCreateWithData((CFDataRef)srcData, NULL);
-	NSDictionary *srcMetadata = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(srcSource,0,NULL);
+- (void) copyExifFrom:(NSString *)src to:(NSString *)dest {
 
-	// get the assets library
-    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    // open source and dest images
+    try {
+        NSData *imageData = [NSData dataWithContentsOfFile:src];
+        UIImage *stubImage = [UIImage imageNamed:dest];
+    }
+    @catch (NSException *exception) {
+        NSMutableDictionary * info = [NSMutableDictionary dictionary];
+        [info setValue:exception.name forKey:@"ExceptionName"];
+        [info setValue:exception.reason forKey:@"ExceptionReason"];
+        [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
+        [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
+        [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
+        
+        NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
+                                                    code:404 userInfo:info];
+        
+        reject(@"reading_file", @"File cannot be read", error);
+    }
+    
+    // read image basic metadata
+    CGImageSourceRef  cgSource ;
+    cgSource = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, NULL);
+    NSDictionary *metadataNew = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(cgSource,0,NULL);
+    NSDictionary *tiffDic = [metadataNew objectForKey:(NSString *)kCGImagePropertyTIFFDictionary];
 
-	// get the src image metadata (EXIF & TIFF)
-    NSMutableDictionary * imageMetadata = [[srcMetadata objectForKey:UIImagePickerControllerMediaMetadata] mutableCopy];
+    // extract date
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"yyyy:MM:dd HH:mm:ss"];
+    NSDate *dateTime = [dateFormat dateFromString:[tiffDic objectForKey:(NSString *)kCGImagePropertyTIFFDateTime]];
+    //NSLog(@"Image Date from tiffDict: %@", dateTime);
 
-	CFRelease(srcSource);
+    // extract geolocation
+    CLLocation *location = nil;
+    NSDictionary *gpsData = [metadataNew objectForKey:(NSString *)kCGImagePropertyGPSDictionary];
+    // ensure location services are enabled @TODO or not ?
+    if ([gpsData objectForKey:(NSString *)kCGImagePropertyGPSLatitude]
+        && [CLLocationManager locationServicesEnabled]
+        && [CLLocationManager authorizationStatus] != kCLAuthorizationStatusDenied)
+    {
+        double lat = [ [gpsData objectForKey:(NSString *)kCGImagePropertyGPSLatitude] doubleValue];
+        double lon = [ [gpsData objectForKey:(NSString *)kCGImagePropertyGPSLongitude] doubleValue];
+        // lat is negative if direction is south
+        if ([[gpsData valueForKey:@"LatitudeRef"] isEqualToString:@"S"]) {
+            lat = -lat;
+        }
+        // lng is negative if direction is west
+        if ([[gpsData valueForKey:@"LongitudeRef"] isEqualToString:@"W"]) {
+            lon = -lon;
+        }
+        CLLocationDegrees *latitude = &lat;
+        CLLocationDegrees *longitude = &lon;
+        location = [[CLLocation alloc] initWithLatitude:*latitude longitude:*longitude];
+        //NSLog(@"GPS position from metadata: %@", location);
+    }
+
+    // write with SimpleExif
+    ExifContainer *container = [[ExifContainer alloc] init];
+    //[container addUserComment:@"iOS sent mauvais de l'arriere-train !"];
+    if (dateTime != nil) {
+        [container addCreationDate:dateTime];
+    }
+    if (location != nil) {
+        [container addLocation:location];
+    }
+    // add to destination file and save
+    NSData *newImageData = [stubImage addExif:container];
+    [newImageData writeToFile:dest atomically:TRUE];
+
+	CFRelease(cgSource);
 }
 
 @end
