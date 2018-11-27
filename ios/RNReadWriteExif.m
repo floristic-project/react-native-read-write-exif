@@ -120,7 +120,9 @@ RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri
 		return;
 	}
 
-    successCallback(@[[self copyExifFrom:srcUri to:destUri], [NSNull null]]);
+    [self copyExifFrom:srcUri to:destUri]; //@WARNING MIGHT THROW EXCEPTION
+
+    successCallback(@[srcUri, [NSNull null]]);
 }
 
 RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
@@ -146,29 +148,15 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
 		return;
 	}
 
-    resolve([self copyExifFrom:srcUri to:destUri]);
+    [self copyExifFrom:srcUri to:destUri]; // @WARNING MIGHT THROW EXCEPTION
+
+    resolve(srcUri);
 }
 
 - (void) copyExifFrom:(NSString *)src to:(NSString *)dest {
 
-    // open source and dest images
-    try {
-        NSData *imageData = [NSData dataWithContentsOfFile:src];
-        NSData *stubData = [NSData dataWithContentsOfFile:dest];
-    }
-    @catch (NSException *exception) {
-        NSMutableDictionary * info = [NSMutableDictionary dictionary];
-        [info setValue:exception.name forKey:@"ExceptionName"];
-        [info setValue:exception.reason forKey:@"ExceptionReason"];
-        [info setValue:exception.callStackReturnAddresses forKey:@"ExceptionCallStackReturnAddresses"];
-        [info setValue:exception.callStackSymbols forKey:@"ExceptionCallStackSymbols"];
-        [info setValue:exception.userInfo forKey:@"ExceptionUserInfo"];
-        
-        NSError *error = [[NSError alloc] initWithDomain:@"com.floristicreactlibrary"
-                                                    code:404 userInfo:info];
-        
-        reject(@"reading_file", @"File cannot be read", error);
-    }
+    NSData *imageData = [NSData dataWithContentsOfFile:src];
+    NSData *stubData = [NSData dataWithContentsOfFile:dest];
     
     // read image basic metadata
     CGImageSourceRef  cgSource ;
