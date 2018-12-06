@@ -1,6 +1,13 @@
 
 #import "RNReadWriteExif.h"
 #import <React/RCTLog.h>
+#import <ImageIO/ImageIO.h>
+
+#import <CoreLocation/CoreLocation.h>
+#import <Photos/PHPhotoLibrary.h>
+
+#import <Photos/PHAssetCollectionChangeRequest.h>
+
 
 /*
  * Your class must also include the RCT_EXPORT_MODULE() macro. This takes an
@@ -32,8 +39,7 @@
  * on another queue, without affecting the others.
  */
 
-- (dispatch_queue_t)methodQueue
-{
+- (dispatch_queue_t)methodQueue {
     // return dispatch_get_main_queue();
 	return dispatch_queue_create("com.floristicreactlibrary.RNReadWriteExifQueue", DISPATCH_QUEUE_SERIAL);
 }
@@ -61,8 +67,7 @@ RCT_EXPORT_MODULE() // default: "RNReadWriteExif"
  * would otherwise require a round-trip through the bridge.
  */
 
- - (NSDictionary *)constantsToExport
- {
+ - (NSDictionary *)constantsToExport {
 	 return @{
 		 //@"key": @"value"
 	 };
@@ -95,13 +100,9 @@ RCT_EXPORT_MODULE() // default: "RNReadWriteExif"
  * object.
  */
 
-RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri
-				destUri:(NSString *)destUri
+RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri destUri:(NSString *)destUri exif:(NSDictionary *)exif
 				errorCallback:(RCTResponseSenderBlock)errorCallback
-				successCallback:(RCTResponseSenderBlock)successCallback)
-{
-	RCTLogInfo(@"copyExifCallback from %@ to %@", srcUri, destUri);
-
+				successCallback:(RCTResponseSenderBlock)successCallback) {
 	NSFileManager *fileManager = [NSFileManager defaultManager];
 
 	if (![fileManager fileExistsAtPath:srcUri]) {
@@ -120,18 +121,16 @@ RCT_EXPORT_METHOD(copyExifCallback:(NSString *)srcUri
 		return;
 	}
 
-    [self copyExifFrom:srcUri to:destUri]; //@WARNING MIGHT THROW EXCEPTION
+    [self copyExifFrom:srcUri to:destUri existingExif:exif]; //@WARNING MIGHT THROW EXCEPTION
 
     successCallback(@[srcUri, [NSNull null]]);
 }
 
-RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
+RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri exif:(NSDictionary *)exif
 				resolver:(RCTPromiseResolveBlock)resolve
 				rejecter:(RCTPromiseRejectBlock)reject) {
-	RCTLogInfo(@"copyExifPromise from %@ to %@", srcUri, destUri);
-
 	NSFileManager *fileManager = [NSFileManager defaultManager];
-
+    
 	if (![fileManager fileExistsAtPath:srcUri]) {
 		NSError *error = [NSError errorWithDomain:@"com.floristicreactlibrary"
 									code:404
@@ -148,28 +147,110 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
 		return;
 	}
 
-    [self copyExifFrom:srcUri to:destUri]; // @WARNING MIGHT THROW EXCEPTION
+    [self copyExifFrom:srcUri to:destUri existingExif:exif]; // @WARNING MIGHT THROW EXCEPTION
 
     resolve(srcUri);
 }
 
-- (void) copyExifFrom:(NSString *)src to:(NSString *)dest {
+- (void) copyExifFrom:(NSString *)src to:(NSString *)dest existingExif:(NSDictionary *)exif {
+
+    RCTLogInfo(@"EXIF SOURCE: %@", exif);
 
     NSData *imageData = [NSData dataWithContentsOfFile:src];
     NSData *stubData = [NSData dataWithContentsOfFile:dest];
-    
     // read image basic metadata
     CGImageSourceRef  cgSource ;
     cgSource = CGImageSourceCreateWithData((__bridge CFDataRef)imageData, NULL);
-    NSDictionary *metadataNew = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(cgSource,0,NULL);
-
-    // write metadata to dest image
     CFStringRef UTI = CGImageSourceGetType(cgSource); // image mimetype
+    RCTLogInfo(@"UTI: %@", UTI);
+    // read destination image for further EXIF writing
+    CGImageSourceRef cgStub = CGImageSourceCreateWithData((__bridge CFDataRef)stubData, NULL);
+
+
+    // Writable stuff for destination image
     NSMutableData *dest_data = [NSMutableData data];
-    CGImageDestinationRef destination = CGImageDestinationCreateWithData((CFMutableDataRef)dest_data,UTI,1,NULL);
+    NSMutableDictionary *new_metadata = [[NSMutableDictionary alloc] init];
+    //[new_metadata addEntriesFromDictionary:exif];
+
+    
+    // a) Create TIFF dictionary
+    NSMutableDictionary *tiffDictionnary = [[NSMutableDictionary alloc] init];
+
+    // Create formatted date into TIFF dictionary
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"yyyy:MM:dd HH:mm:ss"];
+    //NSDate *imageDate = [dateFormat dateFromString:[tiffDic objectForKey:(NSString *)kCGImagePropertyTIFFDateTime]];
+    // @TODO PUT DATE FROM ORIGINAL EXIF !!
+    [tiffDictionnary setObject:[dateFormat stringFromDate:[NSDate date]] forKey:(NSString *)kCGImagePropertyTIFFDateTime];
+
+    // Set other metadata into TIFF dictionary
+    //[tiffDictionnary setValue:@"6" forKey:(NSString *)kCGImagePropertyTIFFOrientation];
+    [tiffDictionnary setValue:@"Apple du cul kipu" forKey:(NSString *)kCGImagePropertyTIFFMake];
+    [tiffDictionnary setValue:[[UIDevice currentDevice] model] forKey:(NSString *)kCGImagePropertyTIFFModel];
+
+    // set TIFF dictionary in metadata dictionary
+    [new_metadata setObject:tiffDictionnary forKey:(__bridge NSString *)kCGImagePropertyTIFFDictionary];
+    RCTLogInfo(@"New TIFF dict: %@", tiffDictionnary);
+    
+    
+    // a 1/2) create Exif dictionary
+    NSMutableDictionary *exifDictionnary = [[NSMutableDictionary alloc] init];
+    [exifDictionnary setObject:[dateFormat stringFromDate:[NSDate date]] forKey:(NSString *)kCGImagePropertyExifDateTimeOriginal];
+
+    // set Exif dictionary in metadata dictionary
+    [new_metadata setObject:exifDictionnary forKey:(__bridge NSString *)kCGImagePropertyExifDictionary];
+    RCTLogInfo(@"New Exif dict: %@", exifDictionnary);
+
+    
+    // b) Create GPS dictionary
+    NSMutableDictionary *gpsDictionnary = [[NSMutableDictionary alloc] init];
+    [gpsDictionnary setValue:@"12.34567" forKey:(NSString *)kCGImagePropertyGPSLatitude];
+    [gpsDictionnary setValue:@"76.54321" forKey:(NSString *)kCGImagePropertyGPSLongitude];
+    [gpsDictionnary setValue:@"N" forKey:@"LatitudeRef"];
+    [gpsDictionnary setValue:@"B" forKey:@"LongitudeRef"];
+
+    //CLLocationDegrees *latitude = &lat;
+    //CLLocationDegrees *longitude = &lon;
+    //CLLocation *exifLocation = [[CLLocation alloc] initWithLatitude:*latitude longitude:*longitude];
+
+    // set GPS dictionary in metadata dictionary
+    [new_metadata setObject:gpsDictionnary forKey:(__bridge NSString *)kCGImagePropertyGPSDictionary];
+    RCTLogInfo(@"New GPS dict: %@", gpsDictionnary);
+
+    
+    // c) Add other metadata into root dictionary
+    [new_metadata setObject:@"6" forKey:(__bridge NSString *)kCGImagePropertyOrientation];
+    // test
+    [new_metadata setObject:@"Le Exif maker est un con" forKey:(__bridge NSString *)kCGImagePropertyExifMakerNote];
+    [new_metadata setObject:@"Coucou les neuneus" forKey:(__bridge NSString *)kCGImagePropertyExifUserComment];
+    [new_metadata setObject:@"2000-01-01 18:32:23" forKey:(__bridge NSString *)kCGImagePropertyExifDateTimeOriginal];
+    RCTLogInfo(@"New GLOBAL dict: %@", new_metadata);
+
+
+    // Create and write destination image
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)dest_data,UTI,1,NULL);
+    if(!destination) {
+        NSLog(@"***Could not create image destination ***");
+    }
+    // add the image contained in the image source to the destination,
+    // overidding the old metadata with our modified metadata
+    CGImageDestinationAddImageFromSource(destination,cgStub,0, (__bridge CFDictionaryRef)(exif));
+    //CGImageDestinationAddImageFromSource(destination,cgStub,0, (__bridge CFDictionaryRef)(new_metadata));
+    BOOL success;
+    success = CGImageDestinationFinalize(destination);
+    RCTLogInfo(@"Finalize: %d", success);
+
+    //overwrite destination file
+    [dest_data writeToFile:dest atomically:YES];
+    RCTLogInfo(@">>> Written to: %@", dest);
+
+
+    /*// write metadata to dest image
+    NSMutableData *dest_data = [NSMutableData data];
+    CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)dest_data,UTI,1,NULL);
     // inject stub image into destination image
     CGImageSourceRef cgStub = CGImageSourceCreateWithData((__bridge CFDataRef)stubData, NULL);
-    CGImageDestinationAddImageFromSource(destination,cgStub,0, (CFDictionaryRef) metadataNew);
+    CGImageDestinationAddImageFromSource(destination,cgStub,0, (__bridge CFDictionaryRef) exif);
 
     CGImageDestinationFinalize(destination); // @WARNING this might return false (BOOL:NO)
 
@@ -177,9 +258,169 @@ RCT_EXPORT_METHOD(copyExifPromise:(NSString *)srcUri destUri:(NSString *)destUri
     [dest_data writeToFile:dest atomically:YES];
 
     // free memory
+     */
 	CFRelease(cgSource);
     CFRelease(cgStub);
     CFRelease(destination);
+    
+    
+    RCTLogInfo(@"%@", @"DONE les copains");
+    
+    // re-read pour voir
+    RCTLogInfo(@">>> Reading again from: %@", dest);
+    NSData *destNewData = [NSData dataWithContentsOfFile:dest];
+    CGImageSourceRef  cgNewDest ;
+    cgNewDest = CGImageSourceCreateWithData((__bridge CFDataRef)destNewData, NULL);
+    NSDictionary *newDestMeta = (__bridge NSDictionary *) CGImageSourceCopyPropertiesAtIndex(cgNewDest,0,NULL);
+    RCTLogInfo(@"NEW DEST META: %@", newDestMeta);
+    
 }
+
+- (NSDictionary *)getGPSDictionaryForLocation:(CLLocation *)location {
+    
+    NSMutableDictionary *gps = [NSMutableDictionary dictionary];
+    
+    
+    
+    // GPS tag version
+    
+    [gps setObject:@"2.2.0.0" forKey:(NSString *)kCGImagePropertyGPSVersion];
+    
+    
+    
+    // Time and date must be provided as strings, not as an NSDate object
+    
+    NSDate *timestamp = location.timestamp;
+    
+    if (timestamp) {
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        
+        [formatter setDateFormat:@"HH:mm:ss.SSSSSS"];
+        
+        [formatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
+        
+        [gps setObject:[formatter stringFromDate:location.timestamp] forKey:(NSString *)kCGImagePropertyGPSTimeStamp];
+        
+        [formatter setDateFormat:@"yyyy:MM:dd"];
+        
+        [gps setObject:[formatter stringFromDate:location.timestamp] forKey:(NSString *)kCGImagePropertyGPSDateStamp];
+        
+    }
+    
+    
+    
+    // Latitude
+    
+    CGFloat latitude = (CGFloat)location.coordinate.latitude;
+    
+    if (latitude) {
+        
+        if (latitude < 0) {
+            
+            latitude = -latitude;
+            
+            [gps setObject:@"S" forKey:(NSString *)kCGImagePropertyGPSLatitudeRef];
+            
+        } else {
+            
+            [gps setObject:@"N" forKey:(NSString *)kCGImagePropertyGPSLatitudeRef];
+            
+        }
+        
+        [gps setObject:[NSNumber numberWithFloat:latitude] forKey:(NSString *)kCGImagePropertyGPSLatitude];
+        
+    }
+    
+    
+    
+    // Longitude
+    
+    CGFloat longitude = (CGFloat)location.coordinate.longitude;
+    
+    if (longitude) {
+        
+        if (longitude < 0) {
+            
+            longitude = -longitude;
+            
+            [gps setObject:@"W" forKey:(NSString *)kCGImagePropertyGPSLongitudeRef];
+            
+        } else {
+            
+            [gps setObject:@"E" forKey:(NSString *)kCGImagePropertyGPSLongitudeRef];
+            
+        }
+        
+        [gps setObject:[NSNumber numberWithFloat:longitude] forKey:(NSString *)kCGImagePropertyGPSLongitude];
+        
+    }
+    
+    
+    
+    // Altitude
+    
+    CGFloat altitude = (CGFloat)location.altitude;
+    
+    if (altitude) {
+        
+        if (!isnan(altitude)){
+            
+            if (altitude < 0) {
+                
+                altitude = -altitude;
+                
+                [gps setObject:@"1" forKey:(NSString *)kCGImagePropertyGPSAltitudeRef];
+                
+            } else {
+                
+                [gps setObject:@"0" forKey:(NSString *)kCGImagePropertyGPSAltitudeRef];
+                
+            }
+            
+            [gps setObject:[NSNumber numberWithFloat:altitude] forKey:(NSString *)kCGImagePropertyGPSAltitude];
+            
+        }
+        
+    }
+    
+    
+    
+    // Speed, must be converted from m/s to km/h
+    
+    if (location.speed) {
+        
+        if (location.speed >= 0){
+            
+            [gps setObject:@"K" forKey:(NSString *)kCGImagePropertyGPSSpeedRef];
+            
+            [gps setObject:[NSNumber numberWithFloat:(CGFloat)location.speed*3.6] forKey:(NSString *)kCGImagePropertyGPSSpeed];
+            
+        }
+        
+    }
+    
+    
+    
+    // Heading
+    
+    if (location.course) {
+        
+        if (location.course >= 0){
+            
+            [gps setObject:@"T" forKey:(NSString *)kCGImagePropertyGPSTrackRef];
+            
+            [gps setObject:[NSNumber numberWithFloat:(CGFloat)location.course] forKey:(NSString *)kCGImagePropertyGPSTrack];
+            
+        }
+        
+    }
+    
+    
+    
+    return gps;
+    
+}
+
 
 @end
