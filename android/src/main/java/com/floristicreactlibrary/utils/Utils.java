@@ -92,7 +92,14 @@ public class Utils {
                     destinationDirectory.removeField(sourceField.tagInfo);
 
                     // Add field
-                    destinationDirectory.add(sourceField);
+                    if (sourceField.tagInfo.name != null && !sourceField.tagInfo.name.equals("Orientation")) {
+                        destinationDirectory.add(sourceField);
+                    } else {
+                        TiffOutputField orientationField = TiffOutputField
+                                .create(TiffConstants.EXIF_TAG_ORIENTATION,
+                                        destSet.byteOrder, 0);
+                        destinationDirectory.add(orientationField);
+                    }
                 }
             }
 
