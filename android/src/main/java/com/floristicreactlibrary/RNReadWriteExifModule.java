@@ -151,6 +151,9 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
             return;
+        } catch (Error e) {
+            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
+            return;
         }
 
         try {
@@ -159,6 +162,9 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
 
             Log.d("copyExifPromise", "file exists (r/w): " + destUri);
         } catch (Exception e) {
+            promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, e);
+            return;
+        } catch (Error e) {
             promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, e);
             return;
         }
