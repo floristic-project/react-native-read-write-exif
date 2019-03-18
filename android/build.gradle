@@ -35,6 +35,5 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
     //implementation 'com.android.support:exifinterface:28.0.0'
-    compile files('libs/sanselan-0.97-incubator.jar')
+    compile 'org.apache.sanselan:sanselan:0.97-incubator'
 }
-  

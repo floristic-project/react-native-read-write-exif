@@ -127,6 +127,10 @@ public class Utils {
             finalException = exception;
             exception.printStackTrace();
         }
+        catch (Exception exception) {
+            finalException = exception;
+            exception.printStackTrace();
+        }
         finally {
             if (tempStream != null) {
                 try {
