@@ -24,6 +24,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
     private Promise promise;
 
     private Exception exception;
+    private Error error;
 
     public CopyExifTask(@NonNull File srcFile, @NonNull File destFile,
                         @Nullable Callback errorCallback, @Nullable Callback successCallback,
@@ -45,6 +46,8 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
                 return Utils.copyExifData(this.srcFile, this.destFile, null, true);
             } catch (Exception e) {
                 this.exception = e;
+            } catch (Error e) {
+                this.error = e;
             }
         } else {
             Log.d(CopyExifTask.MODULE_NAME, "failed: missing file(s)");
@@ -58,6 +61,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
         Log.d(CopyExifTask.MODULE_NAME, "ending");
         Log.d(CopyExifTask.MODULE_NAME, "succeeded: " + (succeeded != null ? succeeded : "null"));
         Log.d(CopyExifTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
+        Log.d(CopyExifTask.MODULE_NAME, "error: " + (this.error != null ? this.error.getMessage() : "null"));
 
         if (succeeded != null && succeeded) {
             if (this.promise != null) {
@@ -67,13 +71,29 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
             }
         } else {
             if (this.promise != null) {
-                this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.exception);
+                if (this.exception != null) {
+                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.exception);
+                } else if (this.error != null) {
+                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.error);
+                }
             } else if (this.errorCallback != null) {
-                this.errorCallback.invoke(
-                        CopyExifTask.E_COPY_EXIF_ERROR + (
-                                this.exception != null ? " " + this.exception.getMessage() : ""
-                        )
-                );
+                if (this.exception != null) {
+                    this.errorCallback.invoke(
+                            CopyExifTask.E_COPY_EXIF_ERROR + (
+                                    this.exception.getMessage()
+                            )
+                    );
+                } else if (this.error != null) {
+                    this.errorCallback.invoke(
+                            CopyExifTask.E_COPY_EXIF_ERROR + (
+                                    this.error.getMessage()
+                            )
+                    );
+                } else {
+                    this.errorCallback.invoke(
+                            CopyExifTask.E_COPY_EXIF_ERROR + ("")
+                    );
+                }
             }
         }
     }

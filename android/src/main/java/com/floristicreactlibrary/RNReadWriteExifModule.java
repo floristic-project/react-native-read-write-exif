@@ -117,6 +117,9 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
             return;
+        } catch (Error e) {
+            errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
+            return;
         }
 
         try {
@@ -125,6 +128,9 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
 
             Log.d("copyExifCallback", "file exists (r/w): " + destUri);
         } catch (Exception e) {
+            errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + e.getMessage());
+            return;
+        } catch (Error e) {
             errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + e.getMessage());
             return;
         }

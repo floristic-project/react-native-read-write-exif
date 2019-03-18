@@ -23,8 +23,9 @@ import java.util.List;
 public class Utils {
 
     @SuppressWarnings({"ResultOfMethodCallIgnored", "EmptyCatchBlock", "ConstantConditions"})
-    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception {
+    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception, Error {
         Exception finalException = null;
+        Error finalError = null;
 
         String tempFileName = destFile.getAbsolutePath() + ".tmp";
         File tempFile = null;
@@ -132,6 +133,7 @@ public class Utils {
             exception.printStackTrace();
         }
         catch (NoClassDefFoundError error) {
+            finalError = error;
             error.printStackTrace();
         }
         finally {
@@ -151,6 +153,10 @@ public class Utils {
 
         if (finalException != null) {
             throw finalException;
+        }
+
+        if (finalError != null) {
+            throw finalError;
         }
 
         return false;
