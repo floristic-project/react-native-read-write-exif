@@ -24,7 +24,7 @@ public class Utils {
 
     @SuppressWarnings({"ResultOfMethodCallIgnored", "EmptyCatchBlock", "ConstantConditions"})
     public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception {
-        Exception finalException;
+        Exception finalException = null;
 
         String tempFileName = destFile.getAbsolutePath() + ".tmp";
         File tempFile = null;
@@ -130,6 +130,9 @@ public class Utils {
         catch (Exception exception) {
             finalException = exception;
             exception.printStackTrace();
+        }
+        catch (NoClassDefFoundError error) {
+            error.printStackTrace();
         }
         finally {
             if (tempStream != null) {
