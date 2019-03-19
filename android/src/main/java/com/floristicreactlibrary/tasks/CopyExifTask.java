@@ -15,6 +15,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
 
     private static final String MODULE_NAME = "CopyExifTask";
     private static final String E_COPY_EXIF_ERROR = "E_COPY_EXIF_ERROR";
+    private static final String M_UNKNOWN_ERROR = "Unknown error";
 
     private File srcFile;
     private File destFile;
@@ -23,8 +24,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
     private Callback successCallback;
     private Promise promise;
 
-    private Exception exception;
-    private Error error;
+    private Throwable throwable;
 
     public CopyExifTask(@NonNull File srcFile, @NonNull File destFile,
                         @Nullable Callback errorCallback, @Nullable Callback successCallback,
@@ -44,10 +44,8 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
         if (this.srcFile != null && this.destFile != null) {
             try {
                 return Utils.copyExifData(this.srcFile, this.destFile, null, true);
-            } catch (Exception e) {
-                this.exception = e;
-            } catch (Error e) {
-                this.error = e;
+            } catch (Throwable t) {
+                this.throwable = t;
             }
         } else {
             Log.d(CopyExifTask.MODULE_NAME, "failed: missing file(s)");
@@ -60,8 +58,7 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
     protected void onPostExecute(Boolean succeeded) {
         Log.d(CopyExifTask.MODULE_NAME, "ending");
         Log.d(CopyExifTask.MODULE_NAME, "succeeded: " + (succeeded != null ? succeeded : "null"));
-        Log.d(CopyExifTask.MODULE_NAME, "exception: " + (this.exception != null ? this.exception.getMessage() : "null"));
-        Log.d(CopyExifTask.MODULE_NAME, "error: " + (this.error != null ? this.error.getMessage() : "null"));
+        Log.d(CopyExifTask.MODULE_NAME, "throwable: " + (this.throwable != null ? this.throwable.getMessage() : "null"));
 
         if (succeeded != null && succeeded) {
             if (this.promise != null) {
@@ -71,27 +68,21 @@ public class CopyExifTask extends AsyncTask<Integer, Integer, Boolean> {
             }
         } else {
             if (this.promise != null) {
-                if (this.exception != null) {
-                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.exception);
-                } else if (this.error != null) {
-                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.error);
+                if (this.throwable != null) {
+                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, this.throwable);
+                } else {
+                    this.promise.reject(CopyExifTask.E_COPY_EXIF_ERROR, new Throwable(M_UNKNOWN_ERROR));
                 }
             } else if (this.errorCallback != null) {
-                if (this.exception != null) {
+                if (this.throwable != null) {
                     this.errorCallback.invoke(
-                            CopyExifTask.E_COPY_EXIF_ERROR + (
-                                    this.exception.getMessage()
-                            )
-                    );
-                } else if (this.error != null) {
-                    this.errorCallback.invoke(
-                            CopyExifTask.E_COPY_EXIF_ERROR + (
-                                    this.error.getMessage()
+                            CopyExifTask.E_COPY_EXIF_ERROR + " " + (
+                                    this.throwable.getMessage()
                             )
                     );
                 } else {
                     this.errorCallback.invoke(
-                            CopyExifTask.E_COPY_EXIF_ERROR + ("")
+                            CopyExifTask.E_COPY_EXIF_ERROR + " " + M_UNKNOWN_ERROR
                     );
                 }
             }

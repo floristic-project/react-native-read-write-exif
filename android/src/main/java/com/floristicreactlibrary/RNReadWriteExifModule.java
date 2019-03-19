@@ -1,7 +1,10 @@
 
 package com.floristicreactlibrary;
 
+import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -45,12 +48,12 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
      * ReadableArray -> Array
      */
 
-    //private final ReactApplicationContext reactContext;
+    private final ReactApplicationContext reactContext;
 
     @SuppressWarnings("WeakerAccess")
     public RNReadWriteExifModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        //this.reactContext = reactContext;
+        this.reactContext = reactContext;
     }
 
   /*
@@ -114,11 +117,8 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             this.checkFileExists(srcFile);
 
             Log.d("copyExifCallback", "file exists (r/w): " + srcUri);
-        } catch (Exception e) {
-            errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
-            return;
-        } catch (Error e) {
-            errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + e.getMessage());
+        } catch (Throwable t) {
+            errorCallback.invoke(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR + " " + t.getMessage());
             return;
         }
 
@@ -127,11 +127,8 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             this.checkFileExists(destFile);
 
             Log.d("copyExifCallback", "file exists (r/w): " + destUri);
-        } catch (Exception e) {
-            errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + e.getMessage());
-            return;
-        } catch (Error e) {
-            errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + e.getMessage());
+        } catch (Throwable t) {
+            errorCallback.invoke(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR + " " + t.getMessage());
             return;
         }
 
@@ -148,11 +145,8 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             this.checkFileExists(srcFile);
 
             Log.d("copyExifPromise", "file exists (r/w): " + srcUri);
-        } catch (Exception e) {
-            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
-            return;
-        } catch (Error e) {
-            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, e);
+        } catch (Throwable t) {
+            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, t);
             return;
         }
 
@@ -161,11 +155,8 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
             this.checkFileExists(destFile);
 
             Log.d("copyExifPromise", "file exists (r/w): " + destUri);
-        } catch (Exception e) {
-            promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, e);
-            return;
-        } catch (Error e) {
-            promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, e);
+        } catch (Throwable t) {
+            promise.reject(RNReadWriteExifModule.E_READ_DEST_FILE_ERROR, t);
             return;
         }
 
@@ -177,5 +168,74 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                           @Nullable Promise promise) {
         CopyExifTask task = new CopyExifTask(srcFile, destFile, errorCallback, successCallback, promise);
         task.execute();
+    }
+
+    @ReactMethod
+    public void scanFile(String uri, Promise promise) {
+        final String MIME_JPEG = "image/jpeg";
+        File file = null;
+
+        Throwable throwable = null;
+
+        try {
+            file = new File(Uri.parse(uri).getPath());
+            this.checkFileExists(file);
+            Log.d("scanFile", "file exists (r/w): " + uri);
+        } catch (Throwable t) {
+            throwable = t;
+        }
+
+        if (file != null) {
+            try {
+                MediaScannerConnection.scanFile(
+                        this.reactContext,
+                        new String[]{file.getPath()},
+                        new String[]{MIME_JPEG},
+                        new MediaScannerConnection.MediaScannerConnectionClient() {
+                            @Override
+                            public void onMediaScannerConnected() {
+                                Log.d("scanFile", "onMediaScannerConnected");
+                            }
+
+                            @Override
+                            public void onScanCompleted(String s, Uri uri) {
+                                Log.d("scanFile", "onMediaScannerConnected, s: " + s);
+                            }
+                        }
+                );
+            } catch (Throwable t) {
+                throwable = t;
+            }
+
+            try {
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                File directoryPictures = new File("file://"+ Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES
+                ));
+                Uri contentUri = Uri.fromFile(directoryPictures);
+                mediaScanIntent.setData(contentUri);
+                this.reactContext.sendBroadcast(mediaScanIntent);
+            } catch (Throwable t) {
+                throwable = t;
+            }
+
+            try {
+                this.reactContext.sendBroadcast(
+                        new Intent(
+                                Intent.ACTION_MEDIA_MOUNTED,
+                                Uri.parse("file://"+ Environment.getExternalStorageDirectory())
+                        )
+                );
+            } catch (Throwable t) {
+                throwable = t;
+            }
+        }
+
+        if (throwable != null) {
+            promise.reject(RNReadWriteExifModule.E_READ_SRC_FILE_ERROR, throwable);
+            return;
+        }
+
+        promise.resolve(true);
     }
 }

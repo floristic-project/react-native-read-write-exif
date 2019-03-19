@@ -23,9 +23,8 @@ import java.util.List;
 public class Utils {
 
     @SuppressWarnings({"ResultOfMethodCallIgnored", "EmptyCatchBlock", "ConstantConditions"})
-    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Exception, Error {
-        Exception finalException = null;
-        Error finalError = null;
+    public static Boolean copyExifData(File sourceFile, File destFile, List<TagInfo> excludedFields, Boolean resetExif) throws Throwable {
+        Throwable finalThrowable = null;
 
         String tempFileName = destFile.getAbsolutePath() + ".tmp";
         File tempFile = null;
@@ -117,24 +116,22 @@ public class Utils {
             return true;
         }
         catch (ImageReadException exception) {
-            finalException = exception;
-            exception.printStackTrace();
+            finalThrowable = exception;
         }
         catch (ImageWriteException exception) {
-            finalException = exception;
-            exception.printStackTrace();
+            finalThrowable = exception;
         }
         catch (IOException exception) {
-            finalException = exception;
-            exception.printStackTrace();
+            finalThrowable = exception;
         }
         catch (Exception exception) {
-            finalException = exception;
-            exception.printStackTrace();
+            finalThrowable = exception;
         }
         catch (NoClassDefFoundError error) {
-            finalError = error;
-            error.printStackTrace();
+            finalThrowable = error;
+        }
+        catch (Error error) {
+            finalThrowable = error;
         }
         finally {
             if (tempStream != null) {
@@ -151,12 +148,9 @@ public class Utils {
             }
         }
 
-        if (finalException != null) {
-            throw finalException;
-        }
-
-        if (finalError != null) {
-            throw finalError;
+        if (finalThrowable != null) {
+            finalThrowable.printStackTrace();
+            throw finalThrowable;
         }
 
         return false;
