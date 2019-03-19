@@ -209,10 +209,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
 
             try {
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                File directoryPictures = new File("file://"+ Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES
-                ));
-                Uri contentUri = Uri.fromFile(directoryPictures);
+                Uri contentUri = Uri.fromFile(file);
                 mediaScanIntent.setData(contentUri);
                 this.reactContext.sendBroadcast(mediaScanIntent);
             } catch (Throwable t) {
@@ -223,7 +220,7 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                 this.reactContext.sendBroadcast(
                         new Intent(
                                 Intent.ACTION_MEDIA_MOUNTED,
-                                Uri.parse("file://"+ Environment.getExternalStorageDirectory())
+                                Uri.fromFile(file)
                         )
                 );
             } catch (Throwable t) {
