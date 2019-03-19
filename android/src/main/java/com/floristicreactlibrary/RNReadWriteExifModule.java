@@ -220,6 +220,12 @@ public class RNReadWriteExifModule extends ReactContextBaseJavaModule {
                 this.reactContext.sendBroadcast(
                         new Intent(
                                 Intent.ACTION_MEDIA_MOUNTED,
+                                Uri.parse("file://" + Environment.getExternalStorageDirectory())
+                        )
+                );
+                this.reactContext.sendBroadcast(
+                        new Intent(
+                                Intent.ACTION_MEDIA_MOUNTED,
                                 Uri.fromFile(file)
                         )
                 );
