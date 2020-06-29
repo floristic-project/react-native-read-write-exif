@@ -4,9 +4,9 @@ Pod::Spec.new do |s|
   s.version      = "1.0.0"
   s.summary      = "RNReadWriteExif"
   s.description  = <<-DESC
-                  RNReadWriteExif
+                  Provide utilities to read photo EXIF metadatas in React Native
                    DESC
-  s.homepage     = ""
+  s.homepage     = "https://github.com/floristic-project/react-native-read-write-exif"
   s.license      = "MIT"
   # s.license      = { :type => "MIT", :file => "FILE_LICENSE" }
   s.author             = { "author" => "author@domain.cn" }
